@@ -6524,6 +6524,9 @@ let trades = [], selEmo = '', confVal = 0;
 let tradeReviews = [];
 let rwState = { tradeId: null, classification: null, wouldRepeat: null, verdict: null, questions: [], currentQIdx: 0, answers: [] };
 let _restoreInProgress = false; // prevents beforeunload from wiping just-imported data
+// Survives reload (unlike the JS var above) — tells load() to skip local-server sync
+// for exactly one cycle so a fresh import isn't immediately overwritten by stale server data.
+const RESTORE_SKIP_KEY = 'fd_skip_server_sync_once';
 let strategies = [];
 const LS_STRATEGIES = 'fd_strategies';
 let currentAcctType = 'funded'; // default for new trades
@@ -8351,6 +8354,9 @@ Your existing data will be lost.`
 
       // Reload to apply restored data — flag blocks beforeunload from wiping localStorage
       _restoreInProgress = true;
+      // sessionStorage survives the reload — tells load() to skip local-server sync once,
+      // so a stale local server doesn't immediately clobber the data we just restored.
+      try { sessionStorage.setItem(RESTORE_SKIP_KEY, '1'); } catch(e) {}
       setTimeout(() => location.reload(), 1200);
 
     } catch(e) {
@@ -9366,7 +9372,15 @@ async function save() {
 async function load() {
   try {
     // If local server is running, load from it (synced across browsers)
-    if (useLocalServer) {
+    // — unless a backup restore just ran on the previous page load. In that case
+    // the local server's copy is stale by definition, so skip it exactly once,
+    // otherwise it immediately overwrites the data we just imported.
+    let _skipServerSync = false;
+    try { _skipServerSync = sessionStorage.getItem(RESTORE_SKIP_KEY) === '1'; } catch(e) {}
+    if (_skipServerSync) {
+      try { sessionStorage.removeItem(RESTORE_SKIP_KEY); } catch(e) {}
+      console.log('↷ Skipping local-server sync once (just restored from backup)');
+    } else if (useLocalServer) {
       try {
         const serverData = await serverLoad();
         if (serverData && Object.keys(serverData).length > 0) {

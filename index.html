@@ -952,6 +952,7 @@
 /* Trade direction tags */
 .dir-long  { color: var(--green) !important; background: rgba(0,229,160,0.12) !important; border: 1px solid rgba(0,229,160,0.3) !important; border-radius: 4px; padding: 1px 6px; }
 .dir-short { color: var(--red) !important;   background: rgba(255,77,106,0.12) !important; border: 1px solid rgba(255,77,106,0.3) !important; border-radius: 4px; padding: 1px 6px; }
+.dir-tilt  { color: #f97316 !important; background: rgba(249,115,22,0.12) !important; border: 1px solid rgba(249,115,22,0.35) !important; border-radius: 4px; padding: 1px 6px; }
 
 /* Rules tab card-head gold accent → green */
 #view-rules .card-title { color: var(--green) !important; }
@@ -2528,6 +2529,7 @@ textarea.f-inp { resize: vertical; min-height: 70px; font-family: var(--sans); f
 .dir-tag { font-family: var(--mono); font-size: 11px; letter-spacing: 2px; padding: 4px 9px; border-radius: 4px; }
 .dir-long  { background: var(--green-dim); color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
 .dir-short { background: var(--red-dim);   color: var(--red);   border: 1px solid rgba(255,75,75,0.25); }
+.dir-tilt  { background: rgba(249,115,22,0.12); color: #f97316; border: 1px solid rgba(249,115,22,0.35); }
 .le-pnl { font-family: var(--mono); font-size: 22px; font-weight: 700; letter-spacing: 1px; }
 .pnl-pos { color: var(--green); }
 .pnl-be  { color: var(--grey1); }
@@ -3011,6 +3013,8 @@ textarea.f-inp { resize: vertical; min-height: 70px; font-family: var(--sans); f
   font-family: var(--mono); font-size: 10px; letter-spacing: 1px; transition: all 0.15s;
 }
 .dlm-tilt-btn:hover { border-color: #f97316; background: rgba(249,115,22,0.12); }
+[data-theme="light"] .dlm-tilt-btn { background: rgba(0,0,0,0.04); }
+#dlm-tab-tilt.dlm-toggle-active { color: #f97316 !important; background: rgba(249,115,22,0.08) !important; }
 .dlm-stats-bar {
   display: flex; align-items: stretch; gap: 0;
   border-bottom: 1px solid rgba(255,255,255,0.06);
@@ -6519,7 +6523,6 @@ let sbData = { tasks: [], projects: [], books: [], habits: [], goals: [], wishli
 let perfNotes = {};
 let emoNotes  = {}; // key: 'YYYY-MM-DD' → emotional journal text
 let ntdDays = {}; // key: 'YYYY-M-D' → { reasons, notes }
-let tiltDays = {}; // key: 'YYYY-M-D' → { idea, reasons, notes, result, pnl, imgs }
 let trades = [], selEmo = '', confVal = 0;
 let tradeReviews = [];
 let rwState = { tradeId: null, classification: null, wouldRepeat: null, verdict: null, questions: [], currentQIdx: 0, answers: [] };
@@ -7754,51 +7757,88 @@ function dlmResetTiltForm() {
   const delBtn = document.getElementById('dlm-tilt-delete-btn'); if(delBtn) delBtn.style.display = 'none';
 }
 
-function dlmPrefillTilt() {
+// Tilt Day entries live in trades[] like any other trade (tilt:true marker) so
+// they flow automatically through P&L, analytics, trade list and PDF exports.
+const TILT_MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function dlmFindTiltTrade(y, mo, d) {
+  const datePrefix = `${TILT_MONTHS[mo]} ${d},`;
+  return trades.findIndex(t => t.tilt && t.date && t.date.startsWith(datePrefix) &&
+    t.id && new Date(t.id).getFullYear() === y && new Date(t.id).getMonth() === mo);
+}
+
+async function dlmPrefillTilt() {
   if (!dlmDate) { dlmResetTiltForm(); return; }
   const { y, mo, d } = dlmDate;
-  const key = jCalDayKey(y, mo, d);
-  const entry = tiltDays[key];
+  const idx = dlmFindTiltTrade(y, mo, d);
   dlmResetTiltForm();
-  if (!entry) return;
-  const idea = document.getElementById('dlm-tilt-idea'); if(idea) idea.value = entry.idea || '';
-  const notes = document.getElementById('dlm-tilt-notes'); if(notes) notes.value = entry.notes || '';
-  const result = document.getElementById('dlm-tilt-result'); if(result) result.value = entry.result || '';
-  const pnl = document.getElementById('dlm-tilt-pnl'); if(pnl) pnl.value = (entry.pnl || entry.pnl===0) ? entry.pnl : '';
-  const reasons = (entry.reasons||'').split(', ').filter(Boolean);
+  if (idx === -1) return;
+  const t = trades[idx];
+  const idea = document.getElementById('dlm-tilt-idea'); if(idea) idea.value = t.tiltIdea || '';
+  const notes = document.getElementById('dlm-tilt-notes'); if(notes) notes.value = t.tiltNotes || '';
+  const result = document.getElementById('dlm-tilt-result'); if(result) result.value = t.tiltResult || '';
+  const pnl = document.getElementById('dlm-tilt-pnl'); if(pnl) pnl.value = (t.pnl || t.pnl===0) ? t.pnl : '';
+  const reasons = (t.tiltReasons||'').split(', ').filter(Boolean);
   document.querySelectorAll('#dlm-tilt-chips .emo-chip').forEach(c => { if(reasons.includes(c.textContent)) c.classList.add('sel'); });
-  ['idea','result'].forEach(k => {
-    dlmTiltSsData[k] = (entry.imgs && entry.imgs[k]) || null;
-    dlmTiltSsRender(k);
-  });
+  // Resolve possible __idb__ placeholders (same convention save() uses for any trade's imgs)
+  const rawImgs = t.imgs || {};
+  const entryVal = rawImgs.entry === '__idb__' ? (await idbGet('img_' + t.id + '_entry')) : rawImgs.entry;
+  const dailyVal = rawImgs.daily === '__idb__' ? (await idbGet('img_' + t.id + '_daily')) : rawImgs.daily;
+  dlmTiltSsData.idea = entryVal || null;
+  dlmTiltSsData.result = dailyVal || null;
+  dlmTiltSsRender('idea'); dlmTiltSsRender('result');
   const delBtn = document.getElementById('dlm-tilt-delete-btn'); if(delBtn) delBtn.style.display = '';
 }
 
 async function dlmLogTilt() {
   if (!dlmDate) return;
   const { y, mo, d } = dlmDate;
-  const key    = jCalDayKey(y, mo, d);
-  const dt     = new Date(y, mo, d);
   const idea   = document.getElementById('dlm-tilt-idea')?.value.trim() || '';
   const notes  = document.getElementById('dlm-tilt-notes')?.value.trim() || '';
   const result = document.getElementById('dlm-tilt-result')?.value.trim() || '';
   const pnlV   = parseFloat(document.getElementById('dlm-tilt-pnl')?.value);
+  const pnl    = isNaN(pnlV) ? 0 : Math.round(pnlV * 100) / 100;
   const reasons = [...document.querySelectorAll('#dlm-tilt-chips .emo-chip.sel')].map(b=>b.textContent).join(', ');
-  tiltDays[key] = {
-    idea, reasons, notes, result,
-    pnl: isNaN(pnlV) ? null : Math.round(pnlV*100)/100,
-    imgs: { ...dlmTiltSsData },
-    date: dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})
+  const rulesF  = reasons.includes('⚠️ Regel gebrochen') ? 'no' : 'yes';
+
+  const noteParts = [];
+  if (idea) noteParts.push(`Trade-Idee: ${idea}`);
+  if (reasons || notes) noteParts.push(`Warum schiefgegangen: ${[reasons, notes].filter(Boolean).join(' — ')}`);
+  if (result) noteParts.push(`Resultat: ${result}`);
+  const combinedNotes = noteParts.join('\n');
+
+  const existingIdx = dlmFindTiltTrade(y, mo, d);
+  const tradeTs = existingIdx !== -1 ? new Date(trades[existingIdx].id) : new Date(y, mo, d, 12, 0);
+  const tradeDate = `${TILT_MONTHS[mo]} ${d}, ${tradeTs.toTimeString().slice(0,5)}`;
+
+  const tiltTrade = {
+    id: tradeTs.getTime(), date: tradeDate, accountType: dlmAcct,
+    tilt: true, sym: 'TILT', dir: 'TILT', size: 1, pnl,
+    setup: 'Tilt Day', setupTags: ['tilt'], strategy: '',
+    rulesF, ruleData: [], rr: '—', rrPlanned: '—', grade: '',
+    emo: '🔥 Tilt Day', notes: combinedNotes,
+    tiltIdea: idea, tiltReasons: reasons, tiltNotes: notes, tiltResult: result,
+    imgs: { entry: dlmTiltSsData.idea || null, daily: dlmTiltSsData.result || null }
   };
-  renderJCal(); await save();
+
+  if (existingIdx !== -1) {
+    trades[existingIdx] = { ...trades[existingIdx], ...tiltTrade, id: trades[existingIdx].id };
+  } else {
+    trades.unshift(tiltTrade);
+    trades.sort((a,b) => (b.id||0) - (a.id||0));
+  }
+
+  renderLog(); renderJCal(); updateStats(); await save();
   document.getElementById('dlm-overlay').classList.remove('open');
 }
 
 async function dlmDeleteTilt() {
   if (!dlmDate) return;
-  const key = jCalDayKey(dlmDate.y, dlmDate.mo, dlmDate.d);
-  delete tiltDays[key];
-  renderJCal(); await save();
+  const idx = dlmFindTiltTrade(dlmDate.y, dlmDate.mo, dlmDate.d);
+  if (idx === -1) return;
+  const t = trades[idx];
+  if (t.id) { try { await idbDel('img_' + t.id + '_entry'); await idbDel('img_' + t.id + '_daily'); } catch(e) {} }
+  trades.splice(idx, 1);
+  renderLog(); renderJCal(); updateStats(); await save();
   dlmResetTiltForm();
 }
 
@@ -8214,7 +8254,7 @@ function wbRender(d) {
 
 const LS_ALL_KEYS = [
   'fd_trades','fd_caldata','fd_rules','fd_ruleslog',
-  'fd_perfnotes','fd_emonotes','fd_ntddays','fd_tiltdays','fd_gpdata',
+  'fd_perfnotes','fd_emonotes','fd_ntddays','fd_gpdata',
   'fd_plan','fd_propdata','fd_notesdata','fd_sbdata',
   'fd_last_active_date',
   'fd_analysis',
@@ -9095,6 +9135,16 @@ function renderJCal() {
   const mo = jCalDate.getMonth();
   const today = new Date();
   const dayMap = buildDayMap();
+  const tiltDaySet = new Set();
+  jCalFilteredTrades().forEach(t => {
+    if (!t.tilt || !t.date) return;
+    const m = t.date.match(/^([A-Za-z]+)\s+(\d+),/);
+    if (!m) return;
+    const mIdx = TILT_MONTHS.indexOf(m[1]);
+    if (mIdx < 0) return;
+    const ty = t.id ? new Date(t.id).getFullYear() : new Date().getFullYear();
+    tiltDaySet.add(jCalDayKey(ty, mIdx, parseInt(m[2])));
+  });
   updateJCalFilterUI();
 
   // Month label
@@ -9146,7 +9196,7 @@ function renderJCal() {
     const ntdKey = jCalDayKey(y, mo, d);
     const isNTD  = !!(ntdDays[ntdKey]);
     if(isNTD && !day) cls += ' no-trade';
-    const isTilt = !!(tiltDays[ntdKey]);
+    const isTilt = tiltDaySet.has(ntdKey);
     if(isTilt) cls += ' tilt-day';
 
     const pnlColor = !day ? 'var(--grey2)' : day.pnl>0 ? 'var(--green)' : day.pnl<0 ? 'var(--red)' : 'var(--blue)'; // silver
@@ -9344,7 +9394,6 @@ async function save() {
       fd_perfnotes: JSON.stringify(perfNotes),
       fd_emonotes:  JSON.stringify(emoNotes),
       fd_ntddays:   JSON.stringify(ntdDays),
-      fd_tiltdays:  JSON.stringify(tiltDays),
       fd_gpdata:    JSON.stringify(gpData),
       fd_propdata:  JSON.stringify(propData),
       fd_notesdata: JSON.stringify(notesData),
@@ -9461,10 +9510,6 @@ async function load() {
   try {
     const nd = localStorage.getItem('fd_ntddays');
     if(nd) ntdDays = JSON.parse(nd);
-  } catch(e) {}
-  try {
-    const tdRaw = localStorage.getItem('fd_tiltdays');
-    if(tdRaw) tiltDays = JSON.parse(tdRaw);
   } catch(e) {}
   try {
     const straw = localStorage.getItem(LS_STRATEGIES);

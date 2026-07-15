@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guided Session — Futures Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<style>
+:root{
+  --bg:#0a0a0d; --bg2:#121216; --bg3:#181820; --card:#15151b;
+  --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.14);
+  --white:#f2f2f4; --grey1:#a3a3ab; --grey2:#6b6b76;
+  --green:#00e5a0; --red:#ff4d6a; --gold:#f5a623; --cyan:#22d3ee; --purple:#a78bfa;
+  --mono:'JetBrains Mono','Consolas','Courier New',monospace;
+  --head:'Barlow Condensed','Arial Narrow','Impact',sans-serif;
+}
+[data-theme="light"]{
+  --bg:#f5f2ed; --bg2:#ffffff; --bg3:#f0ede8; --card:#ffffff;
+  --border:rgba(0,0,0,0.09); --border2:rgba(0,0,0,0.16);
+  --white:#1a1818; --grey1:#5a5852; --grey2:#8a8780;
+  --green:#0a9b6f; --red:#d6304a; --gold:#b06b0d; --cyan:#0a6e85; --purple:#7c5cd6;
+}
+[data-theme="dim"]{
+  --bg:#2e3248; --bg2:#363b57; --bg3:#3d4260; --card:#333757;
+  --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.15);
+  --white:#f2f2f4; --grey1:#b4b8d6; --grey2:#8a8fae;
+  --green:#00e5a0; --red:#ff4d6a; --gold:#f5a623; --cyan:#22d3ee; --purple:#c4b5fd;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--white); font-family:var(--mono);
+  min-height:100vh; overflow-x:hidden;
+  background-image:radial-gradient(circle at 15% 0%, rgba(245,166,35,0.05), transparent 45%),
+                    radial-gradient(circle at 85% 10%, rgba(34,211,238,0.04), transparent 45%);
+}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* ── Header ── */
+.hdr{
+  display:flex; align-items:center; gap:16px; padding:16px 26px;
+  border-bottom:1px solid var(--border2); background:var(--bg2);
+  position:sticky; top:0; z-index:60; backdrop-filter:blur(10px);
+}
+.hdr-back{
+  font-family:var(--mono); font-size:10px; letter-spacing:1px; color:var(--grey2);
+  text-decoration:none; border:1px solid var(--border2); border-radius:6px;
+  padding:6px 10px; transition:all 0.15s;
+}
+.hdr-back:hover{ border-color:var(--gold); color:var(--gold); }
+.hdr-title-wrap{ display:flex; flex-direction:column; gap:2px; }
+.hdr-title{ font-family:var(--head); font-size:22px; font-weight:800; letter-spacing:1px; }
+.hdr-sub{ font-family:var(--mono); font-size:9px; letter-spacing:2px; color:var(--grey2); }
+.hdr-stats{ margin-left:auto; display:flex; gap:22px; }
+.hdr-stat{ display:flex; flex-direction:column; align-items:flex-end; gap:2px; }
+.hdr-stat-lbl{ font-size:8px; letter-spacing:2px; color:var(--grey2); }
+.hdr-stat-val{ font-family:var(--head); font-size:19px; font-weight:800; }
+.theme-toggle{
+  background:none; border:1px solid var(--border2); border-radius:8px;
+  color:var(--grey1); font-size:14px; cursor:pointer; padding:7px 10px;
+  transition:all 0.15s;
+}
+.theme-toggle:hover{ border-color:var(--gold); color:var(--gold); }
+
+/* ── Context strip ── */
+.ctx-strip{
+  padding:10px 26px; border-bottom:1px solid var(--border);
+  background:rgba(245,166,35,0.03); display:none; gap:14px; align-items:center;
+  font-family:var(--mono); font-size:11px; color:var(--grey1);
+}
+.ctx-strip.show{ display:flex; }
+.ctx-bias{ font-weight:700; letter-spacing:1px; padding:3px 9px; border-radius:4px; font-size:9px; }
+.ctx-bias.bull{ background:rgba(0,229,160,0.15); color:var(--green); }
+.ctx-bias.bear{ background:rgba(255,77,106,0.15); color:var(--red); }
+.ctx-bias.neutral{ background:rgba(255,255,255,0.08); color:var(--grey1); }
+.ctx-notes{ flex:1; opacity:0.85; line-height:1.5; }
+
+/* ── Filter bar (einklappbar) ── */
+.fbar-wrap{ border-bottom:1px solid var(--border); background:var(--bg2); }
+.fbar-hdr{
+  display:flex; align-items:center; gap:10px; padding:12px 26px; cursor:pointer; user-select:none;
+  font-family:var(--mono); font-size:10px; letter-spacing:1.5px; color:var(--grey1); transition:color .15s;
+}
+.fbar-hdr:hover{ color:var(--gold); }
+.fbar-hdr-lbl{ font-weight:700; }
+.fbar-hdr-count{ color:var(--gold); font-weight:700; }
+.fbar-hdr-chevron{ margin-left:auto; font-size:11px; color:var(--grey2); transition:transform .25s ease; display:inline-block; }
+.fbar-hdr-chevron.collapsed{ transform:rotate(-90deg); }
+.fbar-body{ max-height:2000px; overflow:hidden; transition:max-height .3s ease, opacity .25s ease; opacity:1; }
+.fbar-body.collapsed{ max-height:0; opacity:0; }
+.fbar{
+  padding:0 26px 14px;
+  display:flex; flex-direction:column; gap:10px;
+}
+.fbar-row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.fbar-lbl{ font-family:var(--mono); font-size:9px; letter-spacing:1px; color:var(--grey2); min-width:78px; text-align:right; flex-shrink:0; }
+.fchip{
+  padding:5px 12px; border-radius:14px; border:1px solid var(--border2);
+  background:var(--bg3); color:var(--grey1); font-family:var(--mono); font-size:10px;
+  letter-spacing:0.5px; cursor:pointer; transition:all 0.15s;
+}
+.fchip:hover{ border-color:var(--gold); color:var(--white); }
+.fchip.on{ background:rgba(245,166,35,0.16); border-color:var(--gold); color:var(--gold); font-weight:700; }
+.fchip-ref{
+  padding:5px 12px; border-radius:14px; border:1px solid rgba(245,166,35,0.4);
+  background:var(--bg3); color:var(--gold); font-family:var(--mono); font-size:10px;
+  letter-spacing:0.5px; cursor:pointer; transition:all 0.15s; font-weight:700;
+}
+.fchip-ref:hover{ border-color:var(--gold); background:rgba(245,166,35,0.1); }
+.fchip-ref.on{ background:rgba(245,166,35,0.85); border-color:var(--gold); color:#1a1206; box-shadow:0 0 12px rgba(245,166,35,0.35); }
+.fbar-actions{ display:flex; gap:10px; margin-left:auto; }
+.fbar-btn{
+  background:none; border:1px solid var(--border2); border-radius:6px; color:var(--grey2);
+  font-family:var(--mono); font-size:9px; letter-spacing:1px; cursor:pointer; padding:5px 12px;
+  transition:all 0.15s;
+}
+.fbar-btn:hover{ border-color:var(--red); color:var(--red); }
+.fbar-btn.load-today{ border-color:rgba(34,211,238,0.4); color:var(--cyan); }
+.fbar-btn.load-today:hover{ border-color:var(--cyan); background:rgba(34,211,238,0.1); }
+
+/* ── Exclusion row ── */
+.excl-row{
+  padding:8px 26px; border-bottom:1px solid var(--border); background:rgba(255,77,106,0.04);
+  display:none; align-items:center; gap:12px; font-family:var(--mono); font-size:10px; color:var(--grey1);
+}
+.excl-row.show{ display:flex; }
+.excl-reset{
+  background:none; border:1px solid var(--border2); border-radius:6px; color:var(--grey2);
+  font-family:var(--mono); font-size:9px; letter-spacing:1px; cursor:pointer; padding:4px 10px;
+}
+.excl-reset:hover{ border-color:var(--red); color:var(--red); }
+
+.staged-row{
+  padding:8px 26px; border-bottom:1px solid var(--border); background:rgba(245,166,35,0.05);
+  display:none; align-items:center; gap:12px; font-family:var(--mono); font-size:10px; color:#f5a623;
+}
+.staged-row.show{ display:flex; }
+
+/* ── Session body (radial + side panel) — nutzt die volle Bildschirmbreite ── */
+.session-body{ display:flex; gap:24px; width:100%; max-width:none; padding:26px 32px 60px; align-items:flex-start; }
+.radial-col{ flex:1; min-width:0; }
+.side-col{ width:300px; flex-shrink:0; }
+.radial-wrap{ position:relative; width:100%; height:calc(100vh - 260px); min-height:640px; }
+.radial-lines{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:1; }
+.radial-line{ stroke:var(--gold); stroke-width:1.2; opacity:0.35; stroke-dasharray:4 5; animation:dashFlow 3.5s linear infinite; }
+@keyframes dashFlow{ to{ stroke-dashoffset:-90; } }
+
+.wall-empty{
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:14px; padding:100px 20px; color:var(--grey2); text-align:center;
+}
+.wall-empty-icon{ font-size:44px; opacity:0.25; }
+.wall-empty-title{ font-family:var(--head); font-size:20px; font-weight:700; letter-spacing:1px; color:var(--grey1); }
+.wall-empty-sub{ font-family:var(--mono); font-size:11px; letter-spacing:1px; max-width:360px; line-height:1.6; margin:0 auto; }
+
+.hub-node{
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:230px; min-height:170px;
+  border-radius:20px; z-index:10; background:radial-gradient(circle at 50% 25%, rgba(245,166,35,0.16), var(--card) 72%);
+  border:1.5px solid var(--gold); box-shadow:0 0 50px rgba(245,166,35,0.18);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px 22px; text-align:center;
+}
+.hub-lbl{ font-family:var(--mono); font-size:8px; letter-spacing:2px; color:var(--gold); margin-bottom:10px; }
+.hub-quote{ font-family:var(--head); font-size:18px; font-weight:700; line-height:1.35; color:var(--white); outline:none; min-width:1px; }
+.hub-quote:empty::before{ content:'Dein Leitsatz für diese Session…'; color:var(--grey2); }
+.hub-hint{ font-family:var(--mono); font-size:8px; letter-spacing:1px; color:var(--grey2); margin-top:10px; opacity:0; transition:opacity .2s; }
+.hub-node:hover .hub-hint{ opacity:1; }
+
+.radial-card-wrap{
+  position:absolute; width:184px; opacity:0; transform:translateY(20px) scale(0.85);
+  transition:opacity 0.6s cubic-bezier(0.16,1,0.3,1), transform 0.6s cubic-bezier(0.16,1,0.3,1); z-index:3;
+}
+.radial-card-wrap.in{ opacity:1; transform:translateY(0) scale(1); }
+@keyframes floatA{ 0%,100%{ transform:translateY(0) rotate(0deg); } 50%{ transform:translateY(-7px) rotate(-0.4deg); } }
+@keyframes floatB{ 0%,100%{ transform:translateY(0) rotate(0deg); } 50%{ transform:translateY(-10px) rotate(0.5deg); } }
+.radial-card-wrap.in.floating{ animation:var(--floatname,floatA) var(--floatdur,7s) ease-in-out infinite; animation-delay:var(--floatdelay,0s); }
+.radial-card-wrap:hover{ animation-play-state:paused; z-index:8; }
+
+.gcard{
+  position:relative; border-radius:12px; overflow:hidden; cursor:pointer;
+  background:var(--card); border:1px solid var(--border2); aspect-ratio:4/5;
+  transition:transform 0.25s cubic-bezier(0.22,1,0.36,1), box-shadow 0.25s, border-color 0.25s; will-change:transform;
+}
+.gcard.has-reason{ border-color:rgba(245,166,35,0.5); }
+.gcard::after{
+  content:''; position:absolute; inset:0; z-index:3; pointer-events:none; opacity:0;
+  background:radial-gradient(circle 110px at var(--mx,50%) var(--my,50%), rgba(34,211,238,0.28), transparent 70%);
+  transition:opacity 0.2s;
+}
+.gcard.hovering::after{ opacity:1; }
+.gcard.hovering{ box-shadow:0 18px 36px rgba(0,0,0,0.4), 0 0 0 1px rgba(34,211,238,0.3); }
+.gcard-img{ position:absolute; inset:0; background-size:cover; background-position:center; background-color:#000; filter:brightness(0.8); }
+.gcard-noimg{
+  position:absolute; inset:0; display:flex; flex-direction:column; align-items:center;
+  justify-content:center; gap:6px; background:linear-gradient(160deg,var(--bg3),var(--card)); color:var(--grey2);
+}
+.gcard-noimg-icon{ font-size:22px; opacity:0.3; }
+.gcard-noimg-txt{ font-family:var(--mono); font-size:8px; letter-spacing:1px; }
+.gcard-scrim-top{ position:absolute; top:0; left:0; right:0; padding:9px 10px; background:linear-gradient(rgba(0,0,0,0.55),transparent); display:flex; justify-content:space-between; z-index:2; }
+.gcard-scrim-bot{ position:absolute; bottom:0; left:0; right:0; padding:9px 10px; background:linear-gradient(transparent,rgba(0,0,0,0.85)); z-index:2; }
+.gcard-sym{ font-family:var(--head); font-size:19px; font-weight:800; color:#fff; text-shadow:0 1px 4px rgba(0,0,0,0.6); }
+.gcard-dir{ font-family:var(--mono); font-size:8px; font-weight:700; padding:1px 5px; border-radius:3px; margin-left:5px; }
+.gcard-dir.long{ background:rgba(0,229,160,0.22); color:#5ef5c4; }
+.gcard-dir.short{ background:rgba(255,77,106,0.22); color:#ff8fa3; }
+.gcard-rr{ font-family:var(--head); font-size:16px; font-weight:800; text-shadow:0 1px 4px rgba(0,0,0,0.6); }
+.gcard-strat{ font-family:var(--mono); font-size:9px; color:rgba(255,255,255,0.75); }
+.gcard-hero-badge, .gcard-reason-badge, .gcard-refsetup-badge{ position:absolute; top:7px; z-index:4; font-size:11px; background:rgba(0,0,0,0.45); border-radius:50%; width:19px; height:19px; display:flex; align-items:center; justify-content:center; }
+.gcard-hero-badge{ right:7px; }
+.gcard-reason-badge{ right:32px; font-size:9px; }
+.gcard-refsetup-badge{ right:57px; cursor:pointer; transition:background .15s, transform .15s; opacity:0.55; }
+.gcard-refsetup-badge:hover{ transform:scale(1.15); opacity:1; }
+.gcard-refsetup-badge.on{ background:rgba(245,166,35,0.85); opacity:1; }
+.gcard-dismiss{
+  position:absolute; top:6px; left:6px; z-index:4; width:18px; height:18px; border-radius:50%;
+  background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2); color:#fff; font-size:10px;
+  display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .15s, background .15s; cursor:pointer;
+}
+.gcard:hover .gcard-dismiss{ opacity:0.85; }
+.gcard-dismiss:hover{ background:rgba(255,77,106,0.75); opacity:1 !important; }
+.gcard.is-backtest{ border-style:dashed; border-color:rgba(167,139,250,0.55); }
+.gcard-bt-badge{
+  position:absolute; top:6px; left:28px; z-index:4; font-family:var(--mono); font-size:7px; font-weight:700;
+  letter-spacing:0.5px; background:rgba(167,139,250,0.28); color:#e4defc; padding:3px 5px; border-radius:4px; line-height:1;
+}
+.note-row{ max-width:1000px; margin:0 auto; padding:14px 26px 0; font-family:var(--mono); font-size:10px; color:var(--grey2); letter-spacing:0.5px; text-align:center; }
+
+/* ── Side hub (session notes) ── */
+.side-hub{
+  position:sticky; top:90px; background:radial-gradient(circle at 50% 18%, rgba(245,166,35,0.12), var(--card) 75%);
+  border:1.5px solid var(--gold); border-radius:16px; padding:18px 18px 16px;
+  box-shadow:0 0 34px rgba(245,166,35,0.12); display:flex; flex-direction:column; gap:10px;
+}
+.side-hub-lbl{ font-family:var(--mono); font-size:8px; letter-spacing:2px; color:var(--gold); }
+.side-hub-sub{ font-family:var(--mono); font-size:9px; color:var(--grey2); line-height:1.5; margin-bottom:2px; }
+.side-hub-ta{
+  width:100%; min-height:150px; background:rgba(0,0,0,0.22); border:1px solid var(--border2); border-radius:8px;
+  color:var(--white); font-family:var(--mono); font-size:11px; padding:10px; resize:vertical; outline:none; line-height:1.6;
+}
+.side-hub-ta:focus{ border-color:var(--gold); }
+.side-hub-btn{
+  background:rgba(245,166,35,0.15); border:1px solid var(--gold); color:var(--gold); font-family:var(--mono);
+  font-size:10px; letter-spacing:1px; padding:9px; border-radius:8px; cursor:pointer; transition:background .15s;
+}
+.side-hub-btn:hover{ background:rgba(245,166,35,0.26); }
+.side-hub-note{ font-family:var(--mono); font-size:8px; color:var(--grey2); line-height:1.5; text-align:center; }
+.side-hub-preview{
+  font-family:var(--mono); font-size:9px; color:var(--grey1); background:rgba(0,0,0,0.28); border:1px dashed var(--border2);
+  border-radius:8px; padding:10px; white-space:pre-wrap; line-height:1.6; max-height:280px; overflow-y:auto; display:none;
+}
+.side-hub-preview-lbl{ font-family:var(--mono); font-size:8px; letter-spacing:1.5px; color:var(--cyan); margin-bottom:4px; display:none; }
+.side-hub-copy-btn{
+  background:none; border:1px solid rgba(34,211,238,0.35); color:var(--cyan); font-family:var(--mono); font-size:9px;
+  letter-spacing:0.5px; padding:6px 10px; border-radius:6px; cursor:pointer; display:none;
+}
+.side-hub-copy-btn:hover{ background:rgba(34,211,238,0.12); }
+
+/* ── Fullscreen modal ── */
+.fs-overlay{
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:1000;
+  align-items:center; justify-content:center; padding:10px; backdrop-filter:blur(4px);
+}
+.fs-overlay.open{ display:flex; }
+.fs-modal{
+  width:98vw; max-width:98vw; height:97vh; max-height:97vh; background:var(--bg2);
+  border:1px solid var(--border2); border-radius:12px; overflow:hidden;
+  display:grid; grid-template-columns:2.1fr 1fr; box-shadow:0 30px 80px rgba(0,0,0,0.5);
+}
+@media (max-width:860px){ .fs-modal{ grid-template-columns:1fr; overflow-y:auto; } }
+.fs-imgcol{ position:relative; background:#000; display:flex; flex-direction:column; }
+.fs-imgmain{ flex:1; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; }
+.fs-imgmain img{ max-width:100%; max-height:100%; object-fit:contain; }
+.fs-imgmain-empty{ color:var(--grey2); font-family:var(--mono); font-size:11px; letter-spacing:2px; text-align:center; }
+.fs-nav{
+  position:absolute; top:50%; transform:translateY(-50%); background:rgba(0,0,0,0.45);
+  border:1px solid rgba(255,255,255,0.15); color:#fff; width:38px; height:38px; border-radius:50%;
+  cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center;
+  transition:all 0.15s; z-index:4;
+}
+.fs-nav:hover{ background:rgba(245,166,35,0.5); }
+.fs-nav.prev{ left:14px; } .fs-nav.next{ right:14px; }
+.fs-close{
+  position:absolute; top:12px; right:12px; z-index:6; background:rgba(0,0,0,0.5);
+  border:1px solid rgba(255,255,255,0.15); color:#fff; width:32px; height:32px; border-radius:50%;
+  cursor:pointer; font-size:15px; display:flex; align-items:center; justify-content:center;
+}
+.fs-close:hover{ background:rgba(255,77,106,0.6); }
+.fs-thumbs{ display:flex; gap:8px; padding:10px 14px; background:rgba(255,255,255,0.03); border-top:1px solid var(--border); }
+.fs-thumb{
+  width:56px; height:44px; border-radius:5px; background-size:cover; background-position:center;
+  background-color:#111; cursor:pointer; border:2px solid transparent; opacity:0.55; transition:all 0.15s;
+  display:flex; align-items:flex-end; justify-content:center; position:relative;
+}
+.fs-thumb:hover{ opacity:0.9; }
+.fs-thumb.active{ opacity:1; border-color:var(--gold); }
+.fs-thumb-lbl{ font-family:var(--mono); font-size:7px; letter-spacing:1px; color:#fff; background:rgba(0,0,0,0.6); width:100%; text-align:center; padding:1px 0; }
+.fs-thumb-star{ position:absolute; top:2px; right:2px; font-size:9px; }
+
+.fs-detail{ padding:24px 26px; overflow-y:auto; display:flex; flex-direction:column; gap:16px; }
+.fs-detail-hdr{ display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
+.fs-sym{ font-family:var(--head); font-size:34px; font-weight:800; letter-spacing:1px; }
+.fs-rr{ font-family:var(--head); font-size:22px; font-weight:800; margin-left:auto; }
+.fs-meta{ font-family:var(--mono); font-size:10px; color:var(--grey2); letter-spacing:1px; }
+.fs-sec{ background:var(--bg3); border:1px solid var(--border); border-radius:10px; padding:14px 16px; }
+.fs-reason-sec{ border-color:rgba(245,166,35,0.35); background:rgba(245,166,35,0.05); }
+.fs-reason-ta{
+  width:100%; min-height:64px; background:rgba(0,0,0,0.2); border:1px solid var(--border2); border-radius:6px;
+  color:var(--white); font-family:var(--mono); font-size:11px; padding:9px; resize:vertical; outline:none; line-height:1.6;
+}
+.fs-reason-ta:focus{ border-color:var(--gold); }
+.fs-reason-actions{ display:flex; align-items:center; gap:10px; margin-top:8px; flex-wrap:wrap; }
+.fs-reason-save-btn{
+  background:none; border:1px solid rgba(34,211,238,0.35); color:var(--cyan); font-family:var(--mono); font-size:9px;
+  letter-spacing:0.5px; padding:6px 10px; border-radius:6px; cursor:pointer; transition:background .15s;
+}
+.fs-reason-save-btn:hover{ background:rgba(34,211,238,0.12); }
+.fs-reason-saved-msg{ font-family:var(--mono); font-size:9px; color:var(--green); opacity:0; transition:opacity .3s; }
+.fs-dismiss-btn{
+  background:none; border:1px solid rgba(255,77,106,0.35); color:var(--red); font-family:var(--mono); font-size:9px;
+  letter-spacing:1px; padding:8px 12px; border-radius:6px; cursor:pointer; align-self:flex-start;
+}
+.fs-dismiss-btn:hover{ background:rgba(255,77,106,0.12); }
+.fs-sec-title{ font-family:var(--mono); font-size:9px; letter-spacing:2px; color:var(--grey2); margin-bottom:10px; }
+.fs-tags-grid{ display:flex; flex-wrap:wrap; gap:6px; }
+.fs-tag-group{ margin-bottom:8px; }
+.fs-tag-group:last-child{ margin-bottom:0; }
+.fs-tag-group-lbl{ font-family:var(--mono); font-size:8px; letter-spacing:1.5px; color:var(--grey2); margin-bottom:5px; }
+.fs-tag{
+  display:inline-block; font-family:var(--mono); font-size:10px; padding:3px 9px; border-radius:5px;
+  background:rgba(34,211,238,0.08); color:var(--cyan); border:1px solid rgba(34,211,238,0.22);
+  letter-spacing:0.5px; margin:0 5px 5px 0;
+}
+.fs-notes{ font-family:var(--mono); font-size:11px; color:var(--grey1); line-height:1.7; white-space:pre-wrap; }
+.fs-warn-sec{ border-color:rgba(255,77,106,0.3); background:rgba(255,77,106,0.05); }
+.fs-warn-item{ font-family:var(--mono); font-size:11px; color:var(--red); display:flex; gap:8px; margin-bottom:6px; line-height:1.5; }
+.fs-warn-item:last-child{ margin-bottom:0; }
+.fs-warn-empty{ font-family:var(--mono); font-size:10px; color:var(--grey2); letter-spacing:0.5px; }
+.fs-footer-nav{ display:flex; gap:10px; margin-top:auto; padding-top:6px; }
+.fs-footer-btn{
+  flex:1; background:none; border:1px solid var(--border2); border-radius:8px; color:var(--grey1);
+  font-family:var(--mono); font-size:10px; letter-spacing:1px; cursor:pointer; padding:10px; transition:all 0.15s;
+}
+.fs-footer-btn:hover{ border-color:var(--gold); color:var(--gold); }
+.fs-pos-lbl{ font-family:var(--mono); font-size:9px; color:var(--grey2); align-self:center; letter-spacing:1px; }
+
+.key-hint{
+  position:fixed; bottom:14px; left:50%; transform:translateX(-50%); z-index:40;
+  font-family:var(--mono); font-size:9px; color:var(--grey2); letter-spacing:1px;
+  background:var(--bg2); border:1px solid var(--border2); border-radius:20px; padding:6px 16px;
+  display:flex; gap:14px; opacity:0.85;
+}
+kbd{ background:var(--bg3); border:1px solid var(--border2); border-radius:3px; padding:0 4px; font-family:var(--mono); font-size:9px; color:var(--grey1); }
+
+@media (max-width:1050px){
+  .session-body{ flex-direction:column; }
+  .side-col{ width:100%; }
+  .side-hub{ position:static; }
+  .radial-wrap{ height:1100px; }
+}
+</style>
+</head>
+<body>
+
+<div class="hdr" id="hdr-bar">
+  <a class="hdr-back" href="index.html">← DESK</a>
+  <div class="hdr-title-wrap">
+    <div class="hdr-title">🧠 GUIDED SESSION</div>
+    <div class="hdr-sub">Second Brain · gefilterte Setups als visuelle Vorbereitung</div>
+  </div>
+  <div class="hdr-stats" id="hdr-stats">
+    <div class="hdr-stat"><span class="hdr-stat-lbl">MATCHES</span><span class="hdr-stat-val" id="s-total">—</span></div>
+    <div class="hdr-stat"><span class="hdr-stat-lbl">WIN RATE</span><span class="hdr-stat-val" id="s-wr">—</span></div>
+    <div class="hdr-stat"><span class="hdr-stat-lbl">TOTAL R</span><span class="hdr-stat-val" id="s-totalr">—</span></div>
+    <div class="hdr-stat"><span class="hdr-stat-lbl">AVG R</span><span class="hdr-stat-val" id="s-avgr">—</span></div>
+  </div>
+  <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn" title="Theme wechseln (Dark/Dim/Light)">🌙</button>
+</div>
+
+<div class="ctx-strip" id="ctx-strip">
+  <span class="ctx-bias" id="ctx-bias-lbl"></span>
+  <div class="ctx-notes" id="ctx-notes-txt"></div>
+</div>
+
+<div class="staged-row" id="staged-row">
+  <span id="staged-count"></span>
+  <button class="excl-reset" onclick="clearStagedRefs()" style="margin-left:auto">✕ zurücksetzen</button>
+</div>
+
+<div class="fbar-wrap">
+  <div class="fbar-hdr" onclick="toggleFilterBar()">
+    <span class="fbar-hdr-lbl">🔍 FILTER</span>
+    <span class="fbar-hdr-count" id="fbar-active-count"></span>
+    <span class="fbar-hdr-chevron" id="fbar-chevron">▾</span>
+  </div>
+  <div class="fbar-body" id="fbar-body">
+    <div class="fbar" id="fbar"></div>
+  </div>
+</div>
+
+<div class="excl-row" id="excl-row">
+  <span id="excl-count"></span>
+  <button class="excl-reset" onclick="resetExclusions()">↺ Alle wieder anzeigen</button>
+</div>
+
+<div id="wall-empty-wrap"></div>
+
+<div class="session-body" id="session-body" style="display:none">
+  <div class="radial-col">
+    <div class="radial-wrap" id="radial-wrap">
+      <svg class="radial-lines" id="radial-lines"></svg>
+      <div class="hub-node" id="hub-node">
+        <div class="hub-lbl">DEIN LEITSATZ</div>
+        <div class="hub-quote" id="hub-quote" contenteditable="true" spellcheck="false"></div>
+        <div class="hub-hint">Klicken zum Bearbeiten</div>
+      </div>
+      <div id="radial-cards"></div>
+    </div>
+    <div class="note-row">✕ blendet eine Karte aus dieser Session aus, der nächste Treffer aus dem Filter-Pool rückt automatisch nach · 📝-Badge = Referenz-Begründung vorhanden · 🔬 = Backtest-Trade</div>
+  </div>
+  <div class="side-col">
+    <div class="side-hub">
+      <div class="side-hub-lbl">SESSION NOTES</div>
+      <div class="side-hub-sub">Learnings, Gedanken, was du aus diesen Setups für heute mitnimmst.</div>
+      <textarea class="side-hub-ta" id="session-notes-ta" placeholder="Was nimmst du aus diesen Referenz-Trades für die heutige Session mit?"></textarea>
+      <button class="side-hub-btn" onclick="transferToRecap()">→ Vorschau: In Session Reflection</button>
+      <div class="side-hub-preview-lbl" id="preview-lbl">VORSCHAU DES ÜBERTRAGS</div>
+      <div class="side-hub-preview" id="side-hub-preview"></div>
+      <button class="side-hub-copy-btn" id="copy-preview-btn" onclick="copyPreview()">📋 In Zwischenablage kopieren</button>
+      <div class="side-hub-note">Vorschau · kopiere den Text bei Bedarf manuell in dein "Session Reflection"-Feld im Post-Session-Tab von Futures Desk.</div>
+    </div>
+  </div>
+</div>
+
+<div class="key-hint">
+  <span><kbd>←</kbd><kbd>→</kbd> im Vollbild navigieren</span>
+  <span><kbd>Esc</kbd> schließen</span>
+</div>
+
+<!-- Fullscreen modal -->
+<div class="fs-overlay" id="fs-overlay" onclick="if(event.target===this) closeFs()">
+  <div class="fs-modal">
+    <div class="fs-imgcol">
+      <button class="fs-close" onclick="closeFs()">✕</button>
+      <button class="fs-nav prev" onclick="fsCycleSlot(-1)">‹</button>
+      <div class="fs-imgmain" id="fs-imgmain"><div class="fs-imgmain-empty">Lädt…</div></div>
+      <button class="fs-nav next" onclick="fsCycleSlot(1)">›</button>
+      <div class="fs-thumbs" id="fs-thumbs"></div>
+    </div>
+    <div class="fs-detail" id="fs-detail"></div>
+  </div>
+</div>
+
+<script src="session-guide.js"></script>
+</body>
+</html>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       

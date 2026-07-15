@@ -1184,6 +1184,17 @@ img.ss-preview{
 }
 .ss-slot.has-img .ss-clear{display:flex}
 .ss-clear:hover{background:rgba(255,77,106,0.8)}
+.ss-hero-star{
+  position:absolute;top:5px;left:5px;z-index:3;
+  background:rgba(0,0,0,0.55);border:none;color:rgba(255,255,255,0.35);
+  width:22px;height:22px;border-radius:50%;cursor:pointer;
+  font-size:12px;display:none;align-items:center;justify-content:center;
+  transition:all 0.15s;line-height:1;
+}
+.ss-slot.has-img .ss-hero-star{display:flex}
+.ss-hero-star:hover{background:rgba(245,166,35,0.35);color:#f5a623}
+.ss-slot.hero-selected{box-shadow:0 0 0 2px #f5a623 inset}
+.ss-slot.hero-selected .ss-hero-star{color:#f5a623;background:rgba(245,166,35,0.3)}
 .ss-slot-lbl{
   position:absolute;bottom:0;left:0;right:0;
   background:linear-gradient(transparent,rgba(0,0,0,0.7));
@@ -2395,6 +2406,27 @@ textarea.f-inp { resize: vertical; min-height: 70px; font-family: var(--sans); f
 }
 .emo-chip:hover { border-color: var(--gold); color: var(--white); }
 .emo-chip.sel { border-color: var(--cyan); color: #000; background: linear-gradient(135deg, var(--cyan), #3b82f6); box-shadow: 0 0 12px rgba(34,211,238,0.4); }
+
+/* ── Szenario-Zuordnung Chips (Bullish/Bearish Pre-Market-Link) ── */
+.scn-chip {
+  padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border2);
+  background: none; color: var(--grey2); font-family: var(--mono); font-size: 11px;
+  letter-spacing: 0.5px; cursor: pointer; transition: all 0.15s; font-weight: 700;
+}
+.scn-chip:hover { border-color: var(--white); color: var(--white); }
+.scn-chip.active.scn-bull { border-color: var(--green); color: var(--green); background: rgba(0,229,160,0.12); box-shadow: 0 0 10px rgba(0,229,160,0.25); }
+.scn-chip.active.scn-bear { border-color: var(--red); color: var(--red); background: rgba(255,77,106,0.12); box-shadow: 0 0 10px rgba(255,77,106,0.25); }
+.scn-chip.active.scn-none { border-color: var(--grey1); color: var(--white); background: rgba(255,255,255,0.06); }
+
+/* ── Szenario-Status Chips (Session Summary Recap) ── */
+.scn-status-chip {
+  padding: 5px 10px; border-radius: 5px; border: 1px solid var(--border2);
+  background: none; color: var(--grey2); font-family: var(--mono); font-size: 9px;
+  letter-spacing: 0.5px; cursor: pointer; transition: all 0.15s; font-weight: 700;
+}
+.scn-status-chip:hover { border-color: currentColor; }
+.scn-status-chip.scn-status-active { background: color-mix(in srgb, currentColor 20%, transparent); box-shadow: 0 0 8px color-mix(in srgb, currentColor 30%, transparent); border-color: currentColor; }
+.scn-status-chip.scn-status-auto { border-style: dashed; border-color: currentColor; }
 
 /* ══ TRADE REVIEW — Walkthrough & Queue (additiv, eigenständige Seite) ══ */
 .rv-bar{height:6px;border-radius:3px;background:var(--border);overflow:hidden;margin-top:8px;max-width:340px}
@@ -3779,6 +3811,23 @@ textarea.f-inp { resize: vertical; min-height: 70px; font-family: var(--sans); f
 .acct-type-btn.active-paper   { background: rgba(56,189,248,0.15);  color: #38bdf8; box-shadow: inset 0 0 0 1px rgba(56,189,248,0.45); }
 .acct-type-badge-paper    { font-family: var(--mono); font-size: 9px; letter-spacing: 1px; padding: 2px 8px; border-radius: 4px; background: rgba(56,189,248,0.12);  border: 1px solid rgba(56,189,248,0.35);  color: #38bdf8; }
 
+/* ── REFERENZ-SETUP TOGGLE (Best-Practice-Marker: What's-in-Play-Filter + Guided Session) ── */
+.ref-setup-btn {
+  width: 100%; display: flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 9px 10px; border-radius: 8px; border: 1px solid var(--border2);
+  background: rgba(255,255,255,0.03); color: var(--grey2);
+  font-family: var(--mono); font-size: 10px; letter-spacing: 2px; font-weight: 700;
+  cursor: pointer; transition: all 0.18s; text-transform: uppercase;
+}
+.ref-setup-btn:hover { border-color: var(--gold); color: var(--gold); }
+.ref-setup-btn.on {
+  background: rgba(245,166,35,0.15); border-color: var(--gold); color: var(--gold);
+  box-shadow: 0 0 14px rgba(245,166,35,0.3);
+}
+.ref-setup-badge {
+  cursor: pointer; transition: all 0.15s; user-select: none;
+}
+
 /* ── STATS FILTER TOGGLE ── */
 .stats-filter-row { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
 .stats-filter-lbl { font-family: var(--mono); font-size: 9px; letter-spacing: 3px; color: var(--grey2); text-transform: uppercase; }
@@ -3877,7 +3926,7 @@ textarea.f-inp { resize: vertical; min-height: 70px; font-family: var(--sans); f
 .tl-g-ap{background:rgba(52,211,153,.18);color:#34d399}.tl-g-a{background:rgba(52,211,153,.1);color:#6ee7b7}
 .tl-g-b{background:rgba(245,166,35,.12);color:var(--gold)}.tl-g-c{background:rgba(255,77,106,.1);color:var(--red)}
 .tl-g-x{background:rgba(255,77,106,.2);color:var(--red)}.tl-g-def{color:var(--grey2);font-size:10px}
-#view-trades.active{display:flex!important;flex-direction:column;position:fixed;top:60px;left:64px;right:0;bottom:0;z-index:2;overflow:hidden;background:var(--bg)}
+#view-trades.active{display:flex!important;flex-direction:column;position:fixed;top:122px;left:64px;right:0;bottom:0;z-index:2;overflow:hidden;background:var(--bg)}
 </style>
 </head>
 <body>
@@ -4403,6 +4452,16 @@ textarea.f-inp { resize: vertical; min-height: 70px; font-family: var(--sans); f
         </select>
       </div>
 
+
+      <!-- Szenario-Zuordnung (Pre-Market Bullish/Bearish Link) -->
+      <div class="jf-field" style="margin-bottom:14px">
+        <div class="jf-lbl" style="color:var(--grey1)">SZENARIO-ZUORDNUNG (Pre-Market)</div>
+        <div style="display:flex;gap:6px" id="dlm-scn-chips">
+          <button type="button" class="scn-chip scn-none active" data-scn="" onclick="dlmSetScenario('')">– Keins</button>
+          <button type="button" class="scn-chip scn-bull" data-scn="bull" onclick="dlmSetScenario('bull')">🟢 Bullish</button>
+          <button type="button" class="scn-chip scn-bear" data-scn="bear" onclick="dlmSetScenario('bear')">🔴 Bearish</button>
+        </div>
+      </div>
       <!-- Setup Tags -->
       <div style="margin-bottom:14px">
         <div class="jf-lbl" style="color:#22d3ee;margin-bottom:8px">SETUP TAGS</div>
@@ -4711,8 +4770,32 @@ textarea.f-inp { resize: vertical; min-height: 70px; font-family: var(--sans); f
 
     <!-- General Plan -->
     <div class="card gp-card" style="margin-bottom:14px">
-      <div class="gp-card-title" style="--gpc:#c9a84c">📋 Today's Plan</div>
-      <textarea class="f-inp gp-ta" id="gp-plan" style="min-height:100px" placeholder="Overall plan for today: market bias, key themes, what to look for, any news/events to watch...&#10;&#10;09:30 — Market open&#10;10:00 — CPI data"></textarea>
+      <div class="gp-card-title" style="--gpc:#c9a84c">📋 Kontext &amp; News</div>
+      <textarea class="f-inp gp-ta" id="gp-plan" style="min-height:60px" placeholder="Session-übergreifender Kontext: News/Events, generelles Thema (nicht bias-spezifisch)...&#10;09:30 — Market open&#10;10:00 — CPI data"></textarea>
+    </div>
+
+    <!-- Pre-Market Szenarien: zwei parallele Narrative bis der Open eins bestätigt -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+      <div class="card gp-card" style="border-left:3px solid var(--green)">
+        <div class="gp-card-title" style="--gpc:#00e5a0">🟢 BULLISH SZENARIO</div>
+        <div class="jf-lbl" style="margin-top:2px">TRIGGER-BEDINGUNG</div>
+        <textarea class="f-inp gp-ta-sm" id="gp-scn-bull-trigger" placeholder="z.B. Sweep Asia-Low → Reclaim über X"></textarea>
+        <div class="jf-lbl" style="margin-top:8px">INVALIDIERUNG</div>
+        <textarea class="f-inp gp-ta-sm" id="gp-scn-bull-invalid" placeholder="z.B. Break unter Y ohne Reclaim"></textarea>
+        <div style="margin-top:10px;text-align:right">
+          <button onclick="gpOpenGuidedSessionScenario('bull')" title="Guided Session mit Bullish-Kontext öffnen" style="background:linear-gradient(135deg,rgba(0,229,160,0.15),rgba(0,229,160,0.05));border:1px solid rgba(0,229,160,0.4);border-radius:4px;color:#00e5a0;font-family:var(--mono);font-size:9px;letter-spacing:1px;cursor:pointer;padding:5px 12px;transition:all 0.2s;font-weight:700" onmouseover="this.style.borderColor='#00e5a0';this.style.background='rgba(0,229,160,0.22)'" onmouseout="this.style.borderColor='rgba(0,229,160,0.4)';this.style.background='linear-gradient(135deg,rgba(0,229,160,0.15),rgba(0,229,160,0.05))'">🧠 GUIDED SESSION — BULLISH</button>
+        </div>
+      </div>
+      <div class="card gp-card" style="border-left:3px solid var(--red)">
+        <div class="gp-card-title" style="--gpc:#ff4d6a">🔴 BEARISH SZENARIO</div>
+        <div class="jf-lbl" style="margin-top:2px">TRIGGER-BEDINGUNG</div>
+        <textarea class="f-inp gp-ta-sm" id="gp-scn-bear-trigger" placeholder="z.B. Rejection an London-High → Richtung Asia-Low"></textarea>
+        <div class="jf-lbl" style="margin-top:8px">INVALIDIERUNG</div>
+        <textarea class="f-inp gp-ta-sm" id="gp-scn-bear-invalid" placeholder="z.B. Break über Z mit Reclaim"></textarea>
+        <div style="margin-top:10px;text-align:right">
+          <button onclick="gpOpenGuidedSessionScenario('bear')" title="Guided Session mit Bearish-Kontext öffnen" style="background:linear-gradient(135deg,rgba(255,77,106,0.15),rgba(255,77,106,0.05));border:1px solid rgba(255,77,106,0.4);border-radius:4px;color:#ff4d6a;font-family:var(--mono);font-size:9px;letter-spacing:1px;cursor:pointer;padding:5px 12px;transition:all 0.2s;font-weight:700" onmouseover="this.style.borderColor='#ff4d6a';this.style.background='rgba(255,77,106,0.22)'" onmouseout="this.style.borderColor='rgba(255,77,106,0.4)';this.style.background='linear-gradient(135deg,rgba(255,77,106,0.15),rgba(255,77,106,0.05))'">🧠 GUIDED SESSION — BEARISH</button>
+        </div>
+      </div>
     </div>
 
     <!-- Pre-Market Mindset -->
@@ -4738,6 +4821,9 @@ textarea.f-inp { resize: vertical; min-height: 70px; font-family: var(--sans); f
         <div class="gp-emo-label" style="margin-top:4px">Pre-Market Journal</div>
         <textarea id="gp-before-journal" class="f-inp gp-ta" style="min-height:80px"
           placeholder="Wie ist dein Mindset heute? Worauf achtest du? Gibt es etwas das dich ablenkt?"></textarea>
+        <div style="margin-top:12px;text-align:right">
+          <button onclick="gpOpenGuidedSession()" title="Gefilterte historische Trades als visuelle Guided Session öffnen" style="background:linear-gradient(135deg,rgba(245,166,35,0.15),rgba(245,166,35,0.05));border:1px solid rgba(245,166,35,0.4);border-radius:4px;color:#f5a623;font-family:var(--mono);font-size:9px;letter-spacing:1px;cursor:pointer;padding:5px 12px;transition:all 0.2s;font-weight:700" onmouseover="this.style.borderColor='#f5a623';this.style.background='rgba(245,166,35,0.22)'" onmouseout="this.style.borderColor='rgba(245,166,35,0.4)';this.style.background='linear-gradient(135deg,rgba(245,166,35,0.15),rgba(245,166,35,0.05))'">🧠 GUIDED SESSION ÖFFNEN</button>
+        </div>
       </div>
     </div>
 
@@ -4993,6 +5079,57 @@ textarea.f-inp { resize: vertical; min-height: 70px; font-family: var(--sans); f
       </div>
     </div>
 
+    <!-- Szenario-Recap: Pre-Market Bullish/Bearish Bewertung -->
+    <div class="card" style="margin-top:18px;margin-bottom:18px;border-left:3px solid var(--gold)">
+      <div class="card-head">
+        <div class="card-title gp-card-title" style="--gpc:#f5a623">🎯 SZENARIO-RECAP (PRE-MARKET vs. REALITÄT)</div>
+      </div>
+      <div style="padding:16px 20px 20px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div style="border-left:3px solid var(--green);padding:10px 12px;background:rgba(0,229,160,0.04);border-radius:0 6px 6px 0">
+          <div style="font-family:var(--mono);font-size:10px;letter-spacing:2px;color:#00e5a0;font-weight:700;margin-bottom:8px">🟢 BULLISH</div>
+          <div class="jf-lbl">TRIGGER-BEDINGUNG</div>
+          <div id="ssr-bull-trigger" style="font-family:var(--mono);font-size:11px;color:var(--white);margin-bottom:8px;min-height:16px;white-space:pre-wrap">—</div>
+          <div class="jf-lbl">INVALIDIERUNG</div>
+          <div id="ssr-bull-invalid" style="font-family:var(--mono);font-size:11px;color:var(--white);margin-bottom:10px;min-height:16px;white-space:pre-wrap">—</div>
+          <div id="ssr-bull-badge" style="display:inline-block;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;padding:3px 9px;border:1px solid var(--grey2);border-radius:4px;margin-bottom:8px;color:var(--grey2)">OFFEN</div>
+          <div id="ssr-bull-chips" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+            <button type="button" class="scn-status-chip" style="color:var(--green)" data-status="triggered_traded" onclick="scenSetStatus('bull','triggered_traded')">GETRIGGERT + GETRADET</button>
+            <button type="button" class="scn-status-chip" style="color:var(--gold)" data-status="triggered_missed" onclick="scenSetStatus('bull','triggered_missed')">GETRIGGERT, VERPASST</button>
+            <button type="button" class="scn-status-chip" style="color:var(--red)" data-status="invalidated" onclick="scenSetStatus('bull','invalidated')">INVALIDIERT</button>
+            <button type="button" class="scn-status-chip" style="color:var(--grey2)" data-status="unclear" onclick="scenSetStatus('bull','unclear')">UNKLAR / RANGE</button>
+          </div>
+          <div class="jf-lbl">VERKNÜPFTE TRADES</div>
+          <div id="ssr-bull-trades"></div>
+        </div>
+        <div style="border-left:3px solid var(--red);padding:10px 12px;background:rgba(255,77,106,0.04);border-radius:0 6px 6px 0">
+          <div style="font-family:var(--mono);font-size:10px;letter-spacing:2px;color:#ff4d6a;font-weight:700;margin-bottom:8px">🔴 BEARISH</div>
+          <div class="jf-lbl">TRIGGER-BEDINGUNG</div>
+          <div id="ssr-bear-trigger" style="font-family:var(--mono);font-size:11px;color:var(--white);margin-bottom:8px;min-height:16px;white-space:pre-wrap">—</div>
+          <div class="jf-lbl">INVALIDIERUNG</div>
+          <div id="ssr-bear-invalid" style="font-family:var(--mono);font-size:11px;color:var(--white);margin-bottom:10px;min-height:16px;white-space:pre-wrap">—</div>
+          <div id="ssr-bear-badge" style="display:inline-block;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;padding:3px 9px;border:1px solid var(--grey2);border-radius:4px;margin-bottom:8px;color:var(--grey2)">OFFEN</div>
+          <div id="ssr-bear-chips" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+            <button type="button" class="scn-status-chip" style="color:var(--green)" data-status="triggered_traded" onclick="scenSetStatus('bear','triggered_traded')">GETRIGGERT + GETRADET</button>
+            <button type="button" class="scn-status-chip" style="color:var(--gold)" data-status="triggered_missed" onclick="scenSetStatus('bear','triggered_missed')">GETRIGGERT, VERPASST</button>
+            <button type="button" class="scn-status-chip" style="color:var(--red)" data-status="invalidated" onclick="scenSetStatus('bear','invalidated')">INVALIDIERT</button>
+            <button type="button" class="scn-status-chip" style="color:var(--grey2)" data-status="unclear" onclick="scenSetStatus('bear','unclear')">UNKLAR / RANGE</button>
+          </div>
+          <div class="jf-lbl">VERKNÜPFTE TRADES</div>
+          <div id="ssr-bear-trades"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Referenzierte Setups aus Guided Session -->
+    <div class="card" style="margin-top:18px;border-left:3px solid #00e5a0">
+      <div class="card-head">
+        <div class="card-title gp-card-title" style="--gpc:#00e5a0">🔗 REFERENZIERTE SETUPS (Guided Session)</div>
+      </div>
+      <div style="padding:16px 20px 20px" id="gp-referenced-list">
+        <div style="font-family:var(--mono);font-size:11px;color:var(--grey2)">Keine Referenz-Trades für heute markiert.</div>
+      </div>
+    </div>
+
   </div>
 
   <!-- ══ CALENDAR PANEL ══ -->
@@ -5062,7 +5199,10 @@ textarea.f-inp { resize: vertical; min-height: 70px; font-family: var(--sans); f
     <div class="card" style="padding:16px 18px;margin-bottom:14px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
         <div style="font-family:var(--mono);font-size:9px;letter-spacing:3px;color:var(--grey2)">SETUP SCANNER</div>
-        <button onclick="wipClearAll()" style="background:none;border:1px solid var(--border2);border-radius:4px;color:var(--grey2);font-family:var(--mono);font-size:9px;letter-spacing:1px;cursor:pointer;padding:3px 10px;transition:all 0.2s" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--grey2)'">✕ CLEAR ALL</button>
+        <div style="display:flex;gap:8px">
+          <button onclick="wipOpenGuidedSession()" title="Gefilterte Trades als visuelle Guided Session öffnen" style="background:linear-gradient(135deg,rgba(245,166,35,0.15),rgba(245,166,35,0.05));border:1px solid rgba(245,166,35,0.4);border-radius:4px;color:#f5a623;font-family:var(--mono);font-size:9px;letter-spacing:1px;cursor:pointer;padding:3px 10px;transition:all 0.2s;font-weight:700" onmouseover="this.style.borderColor='#f5a623';this.style.background='rgba(245,166,35,0.22)'" onmouseout="this.style.borderColor='rgba(245,166,35,0.4)';this.style.background='linear-gradient(135deg,rgba(245,166,35,0.15),rgba(245,166,35,0.05))'">🧠 GUIDED SESSION</button>
+          <button onclick="wipClearAll()" style="background:none;border:1px solid var(--border2);border-radius:4px;color:var(--grey2);font-family:var(--mono);font-size:9px;letter-spacing:1px;cursor:pointer;padding:3px 10px;transition:all 0.2s" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--grey2)'">✕ CLEAR ALL</button>
+        </div>
       </div>
 
       <!-- Filter Rows -->
@@ -5175,6 +5315,15 @@ textarea.f-inp { resize: vertical; min-height: 70px; font-family: var(--sans); f
             <button class="wip-chip" data-cat="grade" data-val="A"  onclick="wipToggleChip('grade','A',this)">A</button>
             <button class="wip-chip" data-cat="grade" data-val="B"  onclick="wipToggleChip('grade','B',this)">B</button>
             <button class="wip-chip" data-cat="grade" data-val="C"  onclick="wipToggleChip('grade','C',this)">C</button>
+          </div>
+        </div>
+
+        <!-- Referenz-Setups -->
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="font-family:var(--mono);font-size:9px;letter-spacing:1px;color:var(--gold);min-width:72px;text-align:right">SETUP</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">
+            <button class="wip-chip" id="wip-ref-toggle" onclick="wipToggleRefOnly(this)"
+              style="border-color:rgba(245,166,35,0.4)">🏆 Nur Referenz-Setups</button>
           </div>
         </div>
 
@@ -5861,6 +6010,14 @@ textarea.f-inp { resize: vertical; min-height: 70px; font-family: var(--sans); f
           </div>
         </div>
 
+        <!-- Referenz-Setup Marker (Best Practice) -->
+        <div>
+          <button class="ref-setup-btn" id="tm-refsetup-btn" onclick="toggleRefSetup(trades[openTradeIdx]?.id, event)"
+            title="Als Best-Practice Referenz-Setup markieren — erscheint im What's-in-Play-Filter und im Guided Session Tool">
+            <span>🏆</span> REFERENZ-SETUP
+          </button>
+        </div>
+
         <!-- Account type -->
         <div>
           <div style="font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--grey2);margin-bottom:6px">ACCOUNT TYPE</div>
@@ -5907,6 +6064,17 @@ textarea.f-inp { resize: vertical; min-height: 70px; font-family: var(--sans); f
           <div class="tmodal-field">
             <div class="tmodal-field-lbl">P&amp;L ($)</div>
             <input class="f-inp" id="tm-pnl-inp" type="number" placeholder="0" style="font-size:13px;padding:7px 10px"/>
+          </div>
+        </div>
+
+
+        <!-- Szenario-Zuordnung (Pre-Market Bullish/Bearish Link) -->
+        <div>
+          <div style="font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--grey1);margin-bottom:6px">SZENARIO-ZUORDNUNG (PRE-MARKET)</div>
+          <div style="display:flex;gap:6px" id="tm-scn-chips">
+            <button type="button" class="scn-chip scn-none active" data-scn="" onclick="tmSetScenario('')">– Keins</button>
+            <button type="button" class="scn-chip scn-bull" data-scn="bull" onclick="tmSetScenario('bull')">🟢 Bullish</button>
+            <button type="button" class="scn-chip scn-bear" data-scn="bear" onclick="tmSetScenario('bear')">🔴 Bearish</button>
           </div>
         </div>
 
@@ -6005,10 +6173,10 @@ textarea.f-inp { resize: vertical; min-height: 70px; font-family: var(--sans); f
         <div>
           <div style="font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--grey2);margin-bottom:6px">SCREENSHOTS</div>
           <div class="ss-grid" style="grid-template-columns:1fr 1fr">
-            <div class="ss-slot" id="tm-ss-daily"  onclick="tmSsClick('daily')"  style="min-height:80px"><input type="file" accept="image/*" class="ss-input" id="tm-ss-input-daily"  onchange="tmSsLoad(event,'daily')"/><div class="ss-preview" id="tm-ss-prev-daily"></div><div class="ss-empty" id="tm-ss-empty-daily"><div class="ss-icon">📅</div><div class="ss-lbl">DAILY</div></div><button class="ss-clear" id="tm-ss-clear-daily" onclick="event.stopPropagation();tmSsClear('daily')">✕</button><div class="ss-persistent-lbl">📅 DAILY</div></div>
-            <div class="ss-slot" id="tm-ss-4h"     onclick="tmSsClick('4h')"     style="min-height:80px"><input type="file" accept="image/*" class="ss-input" id="tm-ss-input-4h"     onchange="tmSsLoad(event,'4h')"/><div class="ss-preview" id="tm-ss-prev-4h"></div><div class="ss-empty" id="tm-ss-empty-4h"><div class="ss-icon">🕓</div><div class="ss-lbl">4H</div></div><button class="ss-clear" id="tm-ss-clear-4h" onclick="event.stopPropagation();tmSsClear('4h')">✕</button><div class="ss-persistent-lbl">🕓 4H</div></div>
-            <div class="ss-slot" id="tm-ss-1h"     onclick="tmSsClick('1h')"     style="min-height:80px"><input type="file" accept="image/*" class="ss-input" id="tm-ss-input-1h"     onchange="tmSsLoad(event,'1h')"/><div class="ss-preview" id="tm-ss-prev-1h"></div><div class="ss-empty" id="tm-ss-empty-1h"><div class="ss-icon">⏱</div><div class="ss-lbl">1H / 30M</div></div><button class="ss-clear" id="tm-ss-clear-1h" onclick="event.stopPropagation();tmSsClear('1h')">✕</button><div class="ss-persistent-lbl">⏱ 1H</div></div>
-            <div class="ss-slot" id="tm-ss-entry"  onclick="tmSsClick('entry')"  style="min-height:80px"><input type="file" accept="image/*" class="ss-input" id="tm-ss-input-entry"  onchange="tmSsLoad(event,'entry')"/><div class="ss-preview" id="tm-ss-prev-entry"></div><div class="ss-empty" id="tm-ss-empty-entry"><div class="ss-icon">🎯</div><div class="ss-lbl">ENTRY</div></div><button class="ss-clear" id="tm-ss-clear-entry" onclick="event.stopPropagation();tmSsClear('entry')">✕</button><div class="ss-persistent-lbl">🎯 ENTRY</div></div>
+            <div class="ss-slot" id="tm-ss-daily"  onclick="tmSsClick('daily')"  style="min-height:80px"><input type="file" accept="image/*" class="ss-input" id="tm-ss-input-daily"  onchange="tmSsLoad(event,'daily')"/><div class="ss-preview" id="tm-ss-prev-daily"></div><div class="ss-empty" id="tm-ss-empty-daily"><div class="ss-icon">📅</div><div class="ss-lbl">DAILY</div></div><button class="ss-hero-star" id="tm-ss-hero-daily" onclick="event.stopPropagation();tmSetHero('daily')" title="Als Hero-Screenshot markieren">⭐</button><button class="ss-clear" id="tm-ss-clear-daily" onclick="event.stopPropagation();tmSsClear('daily')">✕</button><div class="ss-persistent-lbl">📅 DAILY</div></div>
+            <div class="ss-slot" id="tm-ss-4h"     onclick="tmSsClick('4h')"     style="min-height:80px"><input type="file" accept="image/*" class="ss-input" id="tm-ss-input-4h"     onchange="tmSsLoad(event,'4h')"/><div class="ss-preview" id="tm-ss-prev-4h"></div><div class="ss-empty" id="tm-ss-empty-4h"><div class="ss-icon">🕓</div><div class="ss-lbl">4H</div></div><button class="ss-hero-star" id="tm-ss-hero-4h" onclick="event.stopPropagation();tmSetHero('4h')" title="Als Hero-Screenshot markieren">⭐</button><button class="ss-clear" id="tm-ss-clear-4h" onclick="event.stopPropagation();tmSsClear('4h')">✕</button><div class="ss-persistent-lbl">🕓 4H</div></div>
+            <div class="ss-slot" id="tm-ss-1h"     onclick="tmSsClick('1h')"     style="min-height:80px"><input type="file" accept="image/*" class="ss-input" id="tm-ss-input-1h"     onchange="tmSsLoad(event,'1h')"/><div class="ss-preview" id="tm-ss-prev-1h"></div><div class="ss-empty" id="tm-ss-empty-1h"><div class="ss-icon">⏱</div><div class="ss-lbl">1H / 30M</div></div><button class="ss-hero-star" id="tm-ss-hero-1h" onclick="event.stopPropagation();tmSetHero('1h')" title="Als Hero-Screenshot markieren">⭐</button><button class="ss-clear" id="tm-ss-clear-1h" onclick="event.stopPropagation();tmSsClear('1h')">✕</button><div class="ss-persistent-lbl">⏱ 1H</div></div>
+            <div class="ss-slot" id="tm-ss-entry"  onclick="tmSsClick('entry')"  style="min-height:80px"><input type="file" accept="image/*" class="ss-input" id="tm-ss-input-entry"  onchange="tmSsLoad(event,'entry')"/><div class="ss-preview" id="tm-ss-prev-entry"></div><div class="ss-empty" id="tm-ss-empty-entry"><div class="ss-icon">🎯</div><div class="ss-lbl">ENTRY</div></div><button class="ss-hero-star" id="tm-ss-hero-entry" onclick="event.stopPropagation();tmSetHero('entry')" title="Als Hero-Screenshot markieren">⭐</button><button class="ss-clear" id="tm-ss-clear-entry" onclick="event.stopPropagation();tmSsClear('entry')">✕</button><div class="ss-persistent-lbl">🎯 ENTRY</div></div>
           </div>
         </div>
 
@@ -6058,6 +6226,13 @@ textarea.f-inp { resize: vertical; min-height: 70px; font-family: var(--sans); f
           <div id="tm-ai-review" class="tm-ai-review"></div>
         </div>
 
+        <!-- Referenzierte Setups aus Guided Session (vor dem Loggen gesammelt) -->
+        <div id="tm-ref-section" style="flex-shrink:0;border-top:1px solid rgba(245,166,35,0.2);padding:12px 20px;display:none">
+          <div style="font-family:var(--mono);font-size:9px;color:var(--grey2);letter-spacing:2px;margin-bottom:8px">🔗 REFERENZIERTE SETUPS (GUIDED SESSION)</div>
+          <div id="tm-ref-list"></div>
+          <button id="tm-ref-attach-btn" onclick="attachStagedToOpenTrade()" style="display:none;margin-top:8px;width:100%;background:linear-gradient(135deg,rgba(245,166,35,0.15),rgba(245,166,35,0.05));border:1px solid rgba(245,166,35,0.4);border-radius:4px;color:#f5a623;font-family:var(--mono);font-size:9px;letter-spacing:1px;cursor:pointer;padding:7px 10px;font-weight:700"></button>
+        </div>
+
       </div>
     </div>
   </div>
@@ -6082,7 +6257,8 @@ textarea.f-inp { resize: vertical; min-height: 70px; font-family: var(--sans); f
     <select class="tl-sel" id="tl-f-dir" onchange="renderTradeList()"><option value="">LONG + SHORT</option><option value="LONG">LONG</option><option value="SHORT">SHORT</option></select>
     <select class="tl-sel" id="tl-f-grade" onchange="renderTradeList()"><option value="">ALLE GRADES</option><option value="A+">A+</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="X">X</option></select>
     <select class="tl-sel" id="tl-f-outcome" onchange="renderTradeList()"><option value="">WIN + LOSS</option><option value="W">WIN</option><option value="L">LOSS</option><option value="BE">BREAKEVEN</option></select>
-    <input class="tl-search" id="tl-search" placeholder="suchen..." oninput="renderTradeList()" />
+    <select class="tl-sel" id="tl-f-ref" onchange="renderTradeList()"><option value="">ALLE SETUPS</option><option value="ref">🏆 NUR REFERENZ-SETUPS</option></select>
+    <input class="tl-search" id="tl-search" placeholder="Notizen & Freitext durchsuchen..." oninput="renderTradeList()" />
     <button class="tl-sel" onclick="tlResetFilters()" style="cursor:pointer;color:var(--grey2)">RESET</button>
   </div>
   <div class="tl-stats-bar" id="tl-stats"></div>
@@ -6091,6 +6267,7 @@ textarea.f-inp { resize: vertical; min-height: 70px; font-family: var(--sans); f
       <thead><tr>
         <th data-sort="date" onclick="tlSetSort('date')">DATUM</th>
         <th>DIR</th><th>SYM</th><th>STRATEGIE</th><th>SESSION</th><th>GRADE</th>
+        <th title="Referenz-Setup">🏆</th>
         <th data-sort="rr"  onclick="tlSetSort('rr')">R:R</th>
         <th data-sort="pnl" onclick="tlSetSort('pnl')">P&amp;L</th>
         <th>KONTO</th>
@@ -6726,6 +6903,8 @@ function setStatsFilter(filter) {
 // ══ TRADE LIST JS ══
 let tlSort={col:'date',dir:-1};
 function tlTagVal(t,p){return(t.setupTags||[]).find(x=>typeof x==='string'&&x.startsWith(p+':'))?.split(':',2)[1]||'';}
+function tlStripHtml(html){if(!html)return'';const d=document.createElement('div');d.innerHTML=html;return(d.textContent||d.innerText||'');}
+function tlFreetext(t){return[tlStripHtml(t.notes),t.emoJournal||'',t.tiltNotes||''].join(' ').toLowerCase();}
 function tlRrNum(t){try{return parseFloat(String(t.rr||'0').replace(/[^0-9.\-]/g,''))||0;}catch(e){return 0;}}
 function tlPnlNum(t){return parseFloat(t.pnl||0)||0;}
 function tlOut(t){const r=tlRrNum(t),p=tlPnlNum(t);return r>0.1||p>10?'W':r<-0.1||p<-10?'L':'BE';}
@@ -6758,7 +6937,7 @@ function renderTradeList(){
   if(ft.dir)    list=list.filter(t=>(t.dir||'')===ft.dir);
   if(ft.grade)  list=list.filter(t=>(t.grade||'')===ft.grade);
   if(ft.outcome)list=list.filter(t=>tlOut(t)===ft.outcome);
-  if(ft.q)      list=list.filter(t=>JSON.stringify(t).toLowerCase().includes(ft.q));
+  if(ft.q){const tlTerms=ft.q.split(/\s+/).filter(Boolean);list=list.filter(t=>{const hay=tlFreetext(t)+' '+(t.sym||'').toLowerCase()+' '+(t.strategy||'').toLowerCase()+' '+(t.setup||'').toLowerCase()+' '+(t.setupTags||[]).join(' ').toLowerCase();return tlTerms.every(term=>hay.includes(term));});}
   list.sort((a,b)=>{let av=0,bv=0;if(tlSort.col==='date'){av=a.id||0;bv=b.id||0;}else if(tlSort.col==='pnl'){av=tlPnlNum(a);bv=tlPnlNum(b);}else if(tlSort.col==='rr'){av=tlRrNum(a);bv=tlRrNum(b);}return(av-bv)*tlSort.dir;});
   const ws=list.filter(t=>tlOut(t)==='W').length,ls=list.filter(t=>tlOut(t)==='L').length;
   const tot=list.reduce((s,t)=>s+tlPnlNum(t),0),wr=list.length?Math.round(ws/list.length*100):0;
@@ -6771,13 +6950,15 @@ function renderTradeList(){
     const pc2=pnl>10?'tl-pnl-pos':pnl<-10?'tl-pnl-neg':'tl-pnl-be';
     const rc=tlRrNum(t)>0.1?'tl-rr-pos':tlRrNum(t)<-0.1?'tl-rr-neg':'tl-rr-be';
     const dc=(t.dir||'')==='LONG'?'dir-long':'dir-short';
-    return '<tr class="tl-row" onclick="openTMById('+t.id+')">'+
+    const tlNoteSnip=tlFreetext(t).trim();const tlTitleAttr=tlNoteSnip?(' title="'+tlNoteSnip.slice(0,180).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')+(tlNoteSnip.length>180?'…':'')+'"'):'';
+    return '<tr class="tl-row"'+tlTitleAttr+' onclick="openTMById('+t.id+')">'+
       '<td class="tl-date">'+(t.date||'\u2014')+'</td>'+
       '<td><span class="'+dc+'" style="font-size:11px;padding:1px 5px">'+(t.dir||'\u2014')+'</span></td>'+
       '<td class="tl-sym">'+(t.sym||'\u2014')+'</td>'+
       '<td class="tl-strat">'+(t.strategy||'\u2014')+'</td>'+
       '<td class="tl-candle">'+(tlTagVal(t,'candle')||'\u2014')+'</td>'+
       '<td><span class="tl-grade '+tlGradeCls(t.grade||'')+'">'+(t.grade||'\u2014')+'</span></td>'+
+      '<td class="ref-setup-badge" onclick="event.stopPropagation();toggleRefSetup('+t.id+')" title="Als Referenz-Setup markieren" style="text-align:center;'+(t.refSetup?'':'opacity:0.3')+'">'+(t.refSetup?'🏆':'☆')+'</td>'+
       '<td class="'+rc+'">'+rr+'</td>'+
       '<td class="'+pc2+'">'+(pnl>=0?'+':'')+'$'+Math.round(Math.abs(pnl)).toLocaleString()+'</td>'+
       '<td class="tl-acct">'+(t.accountType||'funded')+'</td></tr>';
@@ -6913,7 +7094,9 @@ function renderLog() {
 
 const EMO_LIST = ['😌 Calm','💪 Confident','🧘 Patient','🎯 Focused','⚡ Sharp','😰 Anxious','😵 Distracted','😴 Bored','🔥 FOMO','😤 Revenge','😨 Fear','🤑 Greedy','😣 Frustrated','🤯 Overloaded','😬 Hesitant','🚀 Euphoric','😞 Discouraged','🧊 Detached'];
 let openTradeIdx = null, tmConfVal = 0;
+let tmScenarioVal = '';
 let tmSsSlots = {daily:null,'4h':null,'1h':null,entry:null};
+let tmHeroSlot = null;
 
 // ── FREE SCREENSHOTS ──
 let tmFssSlots = []; // [{id, label, data}]
@@ -6987,7 +7170,7 @@ function tmSsLoad(e, slot) {
   r.readAsDataURL(file);
   e.target.value='';
 }
-function tmSsClear(slot) { tmSsSlots[slot]=null; tmSsRender(slot); }
+function tmSsClear(slot) { tmSsSlots[slot]=null; if(tmHeroSlot===slot) tmHeroSlot=null; tmSsRender(slot); }
 function tmSsRender(slot) {
   const el   = document.getElementById('tm-ss-'+slot);
   const prev = document.getElementById('tm-ss-prev-'+slot);
@@ -6998,6 +7181,12 @@ function tmSsRender(slot) {
   } else {
     prev.style.backgroundImage=''; el.classList.remove('has-img');
   }
+  el.classList.toggle('hero-selected', tmHeroSlot === slot);
+}
+function tmSetHero(slot) {
+  if(!tmSsSlots[slot]) return;
+  tmHeroSlot = (tmHeroSlot === slot) ? null : slot;
+  ['daily','4h','1h','entry'].forEach(k=>tmSsRender(k));
 }
 function tmSsPopulate(imgs) {
   if(!imgs) { tmSsSlots={daily:null,'4h':null,'1h':null,entry:null}; }
@@ -7033,6 +7222,7 @@ async function openTModal(i) {
       resolved[k] = v === '__idb__' ? (await idbGet('img_' + t.id + '_' + k)) || null : (v || null);
     }
   }
+  tmHeroSlot = t.heroSlot || null;
   tmSsPopulate(resolved);
   // Header
   const symLbl = document.getElementById('tm-sym-label');
@@ -7073,6 +7263,11 @@ async function openTModal(i) {
   // AI section hidden on open
   const aiSec = document.getElementById('tm-ai-section'); if(aiSec) aiSec.style.display='none';
   const aiRev = document.getElementById('tm-ai-review'); if(aiRev) aiRev.innerHTML='';
+  tmScenarioVal = t.scenario || '';
+  document.querySelectorAll('#tm-scn-chips .scn-chip').forEach(b=>b.classList.toggle('active', b.dataset.scn===tmScenarioVal));
+  renderTmReferencedTrades(t);
+  const rsBtn = document.getElementById('tm-refsetup-btn');
+  if (rsBtn) rsBtn.classList.toggle('on', !!t.refSetup);
   document.getElementById('tmodal-overlay').classList.add('open');
 }
 
@@ -7147,7 +7342,9 @@ async function saveTMEdits() {
     ruleData, rulesF,
     notes,
     rr, grade,
-    imgs: tmSsToObject ? tmSsToObject() : (trades[i].imgs || {})
+    imgs: tmSsToObject ? tmSsToObject() : (trades[i].imgs || {}),
+    heroSlot: tmHeroSlot,
+    scenario: tmScenarioVal
   });
 
   // Re-sort so log stays newest-first after a date change
@@ -7155,11 +7352,30 @@ async function saveTMEdits() {
 
   closeTModal(); renderLog(); renderJCal(); updateStats(); await save();
 }
+// ── REFERENZ-SETUP (Best-Practice-Marker) ──
+// Dient doppelt: (1) Filter fuer "valide Setups" in Stats/What's-in-Play, (2) Sichtbarkeit
+// im Guided Session Tool (teilt sich fd_trades ueber localStorage, siehe session-guide.js).
+function toggleRefSetup(id, ev) {
+  if (ev) ev.stopPropagation();
+  if (id === undefined || id === null) return;
+  const idx = trades.findIndex(x => x.id === id);
+  if (idx === -1) return;
+  trades[idx].refSetup = !trades[idx].refSetup;
+  save();
+  if (typeof renderTradeList === 'function') renderTradeList();
+  if (typeof renderPerfDay === 'function') renderPerfDay();
+  if (typeof renderWIP === 'function') renderWIP();
+  if (openTradeIdx === idx) {
+    const b = document.getElementById('tm-refsetup-btn');
+    if (b) b.classList.toggle('on', !!trades[idx].refSetup);
+  }
+}
+
 function openTMById(id) {
   const i = trades.findIndex(t => t.id === id);
   if (i !== -1) openTModal(i);
 }
-function closeTModal() { document.getElementById('tmodal-overlay').classList.remove('open'); openTradeIdx=null; tmFssSlots=[]; tmFssNextId=1; tmSsSlots={daily:null,'4h':null,'1h':null,entry:null}; }
+function closeTModal() { document.getElementById('tmodal-overlay').classList.remove('open'); openTradeIdx=null; tmFssSlots=[]; tmFssNextId=1; tmSsSlots={daily:null,'4h':null,'1h':null,entry:null}; tmHeroSlot=null; }
 function tmDelete() { if(openTradeIdx === null || openTradeIdx === undefined) return; if(!confirm('Delete this trade? This cannot be undone.')) return; deleteTrade(openTradeIdx); }
 
 let openNTDKey = null;
@@ -7399,6 +7615,7 @@ function openLb(src) { document.getElementById('lb-img').src=src; document.getEl
 let dlmDate = null;
 let dlmConf = 0;
 let dlmAcct = 'funded';
+let dlmScenarioVal = '';
 let dlmFormVisible = false;
 const dlmSsData = { daily: null, '4h': null, '1h': null, entry: null };
 const dlmTiltSsData = { idea: null, result: null };
@@ -7510,11 +7727,8 @@ function dlmShowForm(tab) {
   document.getElementById('dlm-add-bar').style.display = 'none';
   dlmSwitchTab(tab || 'trade');
   dlmSetAcct(dlmAcct);
-  // Build rules chips
-  const chipsEl = document.getElementById('dlm-rules-chips');
-  if (chipsEl) chipsEl.innerHTML = (typeof fRuleItems !== 'undefined' ? fRuleItems : []).map(r =>
-    `<button class="emo-chip" onclick="this.classList.toggle('sel')">${r.text}</button>`
-  ).join('');
+  // Build rules chips (3-state: unset/followed/broke)
+  dlmRuleBuild(dlmRuleItems);
 }
 
 function dlmHideForm() {
@@ -7586,6 +7800,14 @@ function dlmSetConf(v) {
   if (lbl) { lbl.textContent = v; lbl.style.color = v<=3?'var(--red)':v<=6?'var(--gold)':'var(--green)'; }
 }
 
+function dlmSetScenario(v){
+  dlmScenarioVal = v;
+  document.querySelectorAll('#dlm-scn-chips .scn-chip').forEach(b=>b.classList.toggle('active', b.dataset.scn===v));
+}
+function tmSetScenario(v){
+  tmScenarioVal = v;
+  document.querySelectorAll('#tm-scn-chips .scn-chip').forEach(b=>b.classList.toggle('active', b.dataset.scn===v));
+}
 function dlmResetForm() {
   const sym = document.getElementById('dlm-sym'); if(sym) sym.value = 'ES';
   const stratSel = document.getElementById('dlm-strategy'); if(stratSel) stratSel.value = '';
@@ -7600,6 +7822,8 @@ function dlmResetForm() {
   for (let i=1;i<=10;i++) { const p=document.getElementById(`dlm-cp${i}`); if(p) p.className='c-pip'; }
   const lbl = document.getElementById('dlm-c-lbl'); if(lbl){lbl.textContent='—';lbl.style.color='var(--grey2)';}
   dlmConf = 0;
+  dlmScenarioVal = '';
+  document.querySelectorAll('#dlm-scn-chips .scn-chip').forEach(b=>b.classList.toggle('active', b.dataset.scn===''));
   ['tag-trigger-tf','tag-trade-candle','tag-sweep-level','tag-15m-conf','tag-3m-conf','tag-protected-swing','tag-candle-pos'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   Object.keys(dlmSsData).forEach(k => { dlmSsData[k]=null; });
   ['daily','4h','1h','entry'].forEach(k => {
@@ -7622,8 +7846,7 @@ async function dlmLogTrade() {
   const rrV  = parseFloat(document.getElementById('dlm-rr')?.value);
   const notes= '';
   const emo  = document.querySelector('#dlm-emo-grid .emo-chip.sel')?.textContent || '';
-  const ruleChips = [...document.querySelectorAll('#dlm-rules-chips .emo-chip')];
-  const ruleData  = ruleChips.map(b => ({ text: b.textContent, state: b.classList.contains('sel') ? 'followed' : 'neutral' }));
+  const ruleData  = dlmRuleGetData();
   const rulesF    = ruleData.some(r=>r.state==='broke') ? 'no' : 'yes';
   const months    = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const timeVal   = document.getElementById('dlm-time')?.value || '12:00';
@@ -7646,7 +7869,9 @@ async function dlmLogTrade() {
     rr: !isNaN(rrV) ? `${rrV.toFixed(2)}R` : '—',
     rrPlanned: '—',
     grade: dlmGrade,
-    imgs: { ...dlmSsData }
+    imgs: { ...dlmSsData },
+    scenario: dlmScenarioVal,
+    referencedTrades: dlmConsumeStagedRefs(dir)
   });
 
   renderLog(); renderJCal(); updateStats(); await save();
@@ -8260,6 +8485,7 @@ const LS_ALL_KEYS = [
   'fd_analysis',
   'fd_strategies','fd_setup_tags',
   'fd_trade_reviews',
+  'fd_sessionguide_quote',
 ];
 
 async function exportData() {
@@ -11142,6 +11368,7 @@ function renderPerfDay() {
           </div>
         </div>
         <div class="ptr-right">
+          <span class="ref-setup-badge" onclick="event.stopPropagation();toggleRefSetup(${t.id})" title="Als Referenz-Setup markieren" style="${t.refSetup?'':'opacity:0.35'};margin-right:2px">${t.refSetup?'🏆':'☆'}</span>
           <span class="ptr-pnl ${pnlClass}">${pnlStr}</span>
           <span class="ptr-rr">${t.rr || '—'}</span>
         </div>
@@ -11952,7 +12179,7 @@ function switchDailyTab(which) {
     btn.style.borderBottomColor = active ? color : 'transparent';
     btn.style.color = active ? color : 'var(--grey2)';
   });
-  if (which === 'ss')  { syncPerfDateFromGP(); renderPerfDay(); const key = document.getElementById('gp-date-picker')?.value || gpDateKey(new Date()); loadSessionGrade(key); }
+  if (which === 'ss')  { syncPerfDateFromGP(); renderPerfDay(); const key = document.getElementById('gp-date-picker')?.value || gpDateKey(new Date()); loadSessionGrade(key); renderReferencedTrades(); renderScenarioRecap(); }
   if (which === 'cal') { renderDailyCalendar(); }
   if (which === 'wip') { loadWIPData(); renderWIP(); }
 }
@@ -11962,7 +12189,214 @@ function switchDailyTab(which) {
 
 const wipFilters = { strategy:[], dir:[], sym:[], tf:[], candle:[], sweep:[], m15:[], grade:[], cpos:[] };
 let   wipBias    = '';
+let   wipRefOnly = false;   // "Nur Referenz-Setups" — filtert zusaetzlich auf t.refSetup===true
 
+function wipToggleRefOnly(el) {
+  wipRefOnly = !wipRefOnly;
+  if (el) el.classList.toggle('wip-chip-on', wipRefOnly);
+  renderWIP();
+  saveWIPData();
+}
+
+function wipOpenGuidedSession() {
+  saveWIPData();
+  window.open('session-guide.html', '_blank');
+}
+// Liest die in Session Guide "vorgemerkten" Referenz-Trade-IDs (vor dem Loggen per
+// 📌 gesammelt, siehe stageReferenceForNextTrade() in session-guide.js) und haengt sie
+// direkt an den NEUEN Trade an, statt an einen Tages-Eintrag -- fuer den Backtest-Workflow
+// "erst in Session Guide referenzieren, dann den Trade loggen", wo es kein sinnvolles
+// "heutiges Gameplan" gibt. Wird nach jedem Log-Vorgang konsumiert (einmalig), damit
+// Referenzen nicht versehentlich am naechsten, unrelated Trade haengen bleiben.
+// Konsumiert nur die gepinnten Referenz-Setups aus Guided Session, deren eigene Richtung (dir)
+// zur JETZT tatsaechlich getradeten Richtung passt. Grund: beim Pre-Market-Research werden oft
+// sowohl bullishe als auch bearishe Kandidaten-Setups gepinnt (siehe scenSetStatus/Szenario-Karten) --
+// nur eines von beiden materialisiert sich meist zu einem echten Trade. Ohne diesen Filter wuerden
+// beide Haelften indiskriminiert an den einen tatsaechlichen Trade gehaengt und die Referenzliste
+// mit dem nicht getradeten Szenario verunreinigen. Nicht passende IDs bleiben staged liegen, statt
+// verworfen zu werden -- z.B. fuer den Fall, dass spaeter im selben Tag ein Trade in die andere
+// Richtung geloggt wird (Reversal-Day).
+function dlmConsumeStagedRefs(newDir) {
+  let staged = [];
+  try { staged = JSON.parse(localStorage.getItem('fd_sessionguide_staged_refs') || '[]'); } catch(e) { staged = []; }
+  if (!staged.length) return [];
+  const matched = newDir
+    ? staged.filter(id => { const rt = trades.find(x => x.id === id); return rt && rt.dir === newDir; })
+    : staged;
+  const remaining = staged.filter(id => !matched.includes(id));
+  try {
+    if (remaining.length) localStorage.setItem('fd_sessionguide_staged_refs', JSON.stringify(remaining));
+    else localStorage.removeItem('fd_sessionguide_staged_refs');
+  } catch(e) {}
+  return matched;
+}
+function renderTmReferencedTrades(t) {
+  const sec  = document.getElementById('tm-ref-section');
+  const list = document.getElementById('tm-ref-list');
+  const attachBtn = document.getElementById('tm-ref-attach-btn');
+  if (!sec || !list) return;
+  const ids = Array.isArray(t.referencedTrades) ? t.referencedTrades : [];
+  let staged = [];
+  try { staged = JSON.parse(localStorage.getItem('fd_sessionguide_staged_refs') || '[]'); } catch(e) { staged = []; }
+  // Nur staged Refs anzeigen/anbieten, deren Richtung zu DIESEM Trade passt -- Refs vom
+  // anderen (nicht getradeten) Szenario sollen hier gar nicht erst als Option auftauchen.
+  const matchedStaged = staged.filter(id => { const rt = trades.find(x => x.id === id); return rt && rt.dir === t.dir; });
+
+  if (!ids.length && !matchedStaged.length) { sec.style.display = 'none'; list.innerHTML = ''; if(attachBtn) attachBtn.style.display='none'; return; }
+  sec.style.display = '';
+  list.innerHTML = ids.map(rid => {
+    const rt = trades.find(x => x.id === rid);
+    if (!rt) return '';
+    const rrNum = parseFloat(String(rt.rr||'0').replace('R','').trim()) || 0;
+    const col = rrNum > 0 ? 'var(--green)' : (rrNum < 0 ? '#ff4d6a' : 'var(--grey2)');
+    return '<div onclick="openTMById('+rt.id+')" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;padding:6px 10px;border:1px solid var(--border2);border-radius:5px;margin-bottom:5px;transition:all 0.2s" onmouseover="this.style.borderColor=\'#f5a623\'" onmouseout="this.style.borderColor=\'var(--border2)\'">'
+      + '<span style="font-family:var(--mono);font-size:11px;color:var(--white)">' + (rt.sym||'') + ' ' + (rt.dir||'') + ' · ' + (rt.date||'') + '</span>'
+      + '<span style="font-family:var(--mono);font-size:11px;font-weight:700;color:' + col + '">' + (rt.rr||'—') + '</span>'
+      + '</div>';
+  }).join('');
+
+  // Erlaubt nachtraegliches Anhaengen: Trade wurde schon geloggt, User referenziert erst DANACH
+  // in Session Guide -- die vorgemerkten IDs warten hier, statt verloren zu gehen (bisher wurden
+  // sie nur beim naechsten NEUEN dlmLogTrade() konsumiert).
+  if (attachBtn) {
+    if (matchedStaged.length) {
+      attachBtn.style.display = '';
+      attachBtn.textContent = '📎 ' + matchedStaged.length + ' passende Referenz' + (matchedStaged.length===1?'':'en') + ' (' + t.dir + ') hier anhängen';
+    } else {
+      attachBtn.style.display = 'none';
+    }
+  }
+}
+async function attachStagedToOpenTrade() {
+  const i = openTradeIdx;
+  if (i === null || i === undefined || !trades[i]) return;
+  let staged = [];
+  try { staged = JSON.parse(localStorage.getItem('fd_sessionguide_staged_refs') || '[]'); } catch(e) { staged = []; }
+  if (!staged.length) return;
+  const dir = trades[i].dir;
+  const matched = staged.filter(id => { const rt = trades.find(x => x.id === id); return rt && rt.dir === dir; });
+  if (!matched.length) return; // nichts Passendes -- Rest bleibt fuer spaeter/andere Trades staged
+  const remaining = staged.filter(id => !matched.includes(id));
+  const existing = Array.isArray(trades[i].referencedTrades) ? trades[i].referencedTrades : [];
+  const merged = existing.slice();
+  matched.forEach(id => { if (!merged.includes(id)) merged.push(id); });
+  trades[i].referencedTrades = merged;
+  try {
+    if (remaining.length) localStorage.setItem('fd_sessionguide_staged_refs', JSON.stringify(remaining));
+    else localStorage.removeItem('fd_sessionguide_staged_refs');
+  } catch(e) {}
+  renderTmReferencedTrades(trades[i]);
+  await save();
+}
+function gpOpenGuidedSession() {
+  saveGameplan();
+  window.open('session-guide.html', '_blank');
+}
+function gpOpenGuidedSessionScenario(bias) {
+  saveGameplan();
+  window.open('session-guide.html?bias=' + encodeURIComponent(bias), '_blank');
+}
+const SCN_STATUS_META = {
+  '':                  { label:'OFFEN',                 color:'var(--grey2)' },
+  'triggered_traded':  { label:'GETRIGGERT + GETRADET',  color:'var(--green)' },
+  'triggered_missed':  { label:'GETRIGGERT, VERPASST',   color:'var(--gold)' },
+  'invalidated':       { label:'INVALIDIERT',            color:'var(--red)' },
+  'unclear':           { label:'UNKLAR / RANGE',         color:'var(--grey2)' }
+};
+// Trades einem Tages-Szenario zuordnen — bewusst NICHT über t.date-String (Format
+// "Jul 13, 14:30" vs. gpDateKey "2026-07-13" wuerden nie matchen), sondern ueber
+// t.id (Timestamp in ms, wird beim Loggen/Editieren immer synchron zu Datum+Zeit
+// gehalten, siehe dlmLogTrade/saveTMEdits) -> new Date(t.id) + gpDateKey() ist robust
+// und exakt dasselbe Pattern, das an anderer Stelle im Code schon fuer Wochentags-
+// Berechnung genutzt wird (new Date(t.id||t.date)).
+function scenTradesFor(key, bias) {
+  if (!bias) return [];
+  return trades.filter(t => t.scenario === bias && t.id && gpDateKey(new Date(t.id)) === key);
+}
+// Manuelle Status-Korrektur. Toggle: Klick auf bereits aktiven Status setzt zurueck auf
+// OFFEN/Auto-Vorschlag, statt einen zweiten Klick zu benoetigen. Ueberschreibt NIE
+// automatisch bei neuen Trade-Verknuepfungen -- nur explizite Klicks aendern `status`.
+function scenSetStatus(bias, status) {
+  const picker = document.getElementById('gp-date-picker');
+  const key = picker?.value || gpDateKey(new Date());
+  gpData[key] = gpData[key] || {};
+  gpData[key].scenarios = gpData[key].scenarios || { bull:{trigger:'',invalid:'',status:''}, bear:{trigger:'',invalid:'',status:''} };
+  gpData[key].scenarios[bias] = gpData[key].scenarios[bias] || {trigger:'',invalid:'',status:''};
+  gpData[key].scenarios[bias].status = (gpData[key].scenarios[bias].status === status) ? '' : status;
+  try { localStorage.setItem('fd_gpdata', JSON.stringify(gpData)); } catch(e) {}
+  renderScenarioRecap();
+}
+function renderScenarioRecap() {
+  const picker = document.getElementById('gp-date-picker');
+  const key = picker?.value || gpDateKey(new Date());
+  const plan = gpData[key] || {};
+  ['bull','bear'].forEach(bias => {
+    const scn = (plan.scenarios && plan.scenarios[bias]) || {trigger:'',invalid:'',status:''};
+    const linked = scenTradesFor(key, bias);
+    const manual = scn.status || '';
+    // Auto-Vorschlag NUR wenn keine manuelle Entscheidung existiert -- verhindert, dass
+    // eine spaeter verlinkte Referenz eine bereits getroffene manuelle Bewertung ueberschreibt.
+    const isAuto = !manual && linked.length > 0;
+    const effective = manual || (isAuto ? 'triggered_traded' : '');
+    const meta = SCN_STATUS_META[effective] || SCN_STATUS_META[''];
+
+    const trigEl = document.getElementById('ssr-'+bias+'-trigger');
+    if (trigEl) trigEl.textContent = scn.trigger || '—';
+    const invEl = document.getElementById('ssr-'+bias+'-invalid');
+    if (invEl) invEl.textContent = scn.invalid || '—';
+
+    const badgeEl = document.getElementById('ssr-'+bias+'-badge');
+    if (badgeEl) {
+      badgeEl.textContent = meta.label + (isAuto ? ' · AUTO-VORSCHLAG' : '');
+      badgeEl.style.color = meta.color;
+      badgeEl.style.borderColor = meta.color;
+      badgeEl.style.borderStyle = isAuto ? 'dashed' : 'solid';
+    }
+
+    document.querySelectorAll('#ssr-'+bias+'-chips .scn-status-chip').forEach(b => {
+      const match = b.dataset.status === effective;
+      b.classList.toggle('scn-status-active', match && !isAuto);
+      b.classList.toggle('scn-status-auto', match && isAuto);
+    });
+
+    const listEl = document.getElementById('ssr-'+bias+'-trades');
+    if (listEl) {
+      if (!linked.length) {
+        listEl.innerHTML = '<div style="font-family:var(--mono);font-size:10px;color:var(--grey2)">Keine Trades verknüpft.</div>';
+      } else {
+        listEl.innerHTML = linked.map(t => {
+          const rrNum = parseFloat(String(t.rr||'0').replace('R','').trim()) || 0;
+          const col = rrNum > 0 ? 'var(--green)' : (rrNum < 0 ? 'var(--red)' : 'var(--grey2)');
+          return '<div onclick="openTMById('+t.id+')" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;padding:5px 8px;border:1px solid var(--border2);border-radius:5px;margin-bottom:4px;transition:all 0.2s" onmouseover="this.style.borderColor=\'var(--white)\'" onmouseout="this.style.borderColor=\'var(--border2)\'">'
+            + '<span style="font-family:var(--mono);font-size:10px;color:var(--white)">'+(t.sym||'')+' '+(t.dir||'')+' · '+(t.date||'')+'</span>'
+            + '<span style="font-family:var(--mono);font-size:10px;font-weight:700;color:'+col+'">'+(t.rr||'—')+'</span>'
+            + '</div>';
+        }).join('');
+      }
+    }
+  });
+}
+function renderReferencedTrades() {
+  const picker = document.getElementById('gp-date-picker');
+  const key = picker?.value || gpDateKey(new Date());
+  const container = document.getElementById('gp-referenced-list');
+  if (!container) return;
+  const ids = (gpData[key] && Array.isArray(gpData[key].referencedTrades)) ? gpData[key].referencedTrades : [];
+  if (!ids.length) {
+    container.innerHTML = '<div style="font-family:var(--mono);font-size:11px;color:var(--grey2)">Keine Referenz-Trades für heute markiert.</div>';
+    return;
+  }
+  container.innerHTML = ids.map(rid => {
+    const t = trades.find(x => x.id === rid);
+    if (!t) return '';
+    const rrNum = parseFloat(String(t.rr||'0').replace('R','').trim()) || 0;
+    const col = rrNum > 0 ? 'var(--green)' : (rrNum < 0 ? '#ff4d6a' : 'var(--grey2)');
+    return '<div onclick="openTMById('+t.id+')" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border:1px solid var(--border2);border-radius:5px;margin-bottom:6px;transition:all 0.2s" onmouseover="this.style.borderColor=\'#00e5a0\'" onmouseout="this.style.borderColor=\'var(--border2)\'">'
+      + '<span style="font-family:var(--mono);font-size:11px;color:var(--white)">' + (t.sym||'') + ' ' + (t.dir||'') + ' · ' + (t.date||'') + '</span>'
+      + '<span style="font-family:var(--mono);font-size:11px;font-weight:700;color:' + col + '">' + (t.rr||'—') + '</span>'
+      + '</div>';
+  }).join('');
+}
 function wipToggleChip(cat, val, el) {
   const arr = wipFilters[cat];
   const idx = arr.indexOf(val);
@@ -12002,12 +12436,13 @@ function wipGetMatches() {
     if (wipFilters.sweep.length   && !wipFilters.sweep.some(v  => tags.includes(v)))  return false;
     if (wipFilters.m15.length     && !wipFilters.m15.some(v    => tags.includes(v)))  return false;
     if (wipFilters.cpos.length    && !wipFilters.cpos.some(v   => tags.includes(v)))  return false;
+    if (wipRefOnly && !t.refSetup) return false;
     return true;
   });
 }
 
 function renderWIP() {
-  const allActive = Object.values(wipFilters).every(a => a.length === 0);
+  const allActive = Object.values(wipFilters).every(a => a.length === 0) && !wipRefOnly;
   const matches   = allActive ? [] : wipGetMatches();
   const total     = matches.length;
   const winners   = matches.filter(t => parseFloat(String(t.rr||'0').replace('R','').trim()||'0') > 0);
@@ -12081,6 +12516,7 @@ function saveWIPData() {
   gpData[key].wipBias    = wipBias;
   gpData[key].wipNotes   = document.getElementById('wip-notes')?.value || '';
   gpData[key].wipFilters = JSON.parse(JSON.stringify(wipFilters));
+  gpData[key].wipRefOnly = wipRefOnly;
   localStorage.setItem('fd_gpdata', JSON.stringify(gpData));
   const lbl = document.getElementById('wip-saved-lbl');
   if (lbl) { lbl.textContent = '✓'; setTimeout(()=>{ lbl.textContent=''; }, 1500); }
@@ -12119,6 +12555,11 @@ function loadWIPData() {
       });
     });
   }
+
+  // Referenz-Setups-Only Toggle
+  wipRefOnly = !!d.wipRefOnly;
+  const refBtn = document.getElementById('wip-ref-toggle');
+  if (refBtn) refBtn.classList.toggle('wip-chip-on', wipRefOnly);
 }
 
 // ── DAILY CALENDAR ──
@@ -12419,6 +12860,18 @@ async function saveGameplan() {
     sessionGrade: sessionGradeVal,
     gameplanGrade: gameplanGradeVal,
     gameplanReach: gameplanReachVal,
+    scenarios: {
+      bull: {
+        trigger: document.getElementById('gp-scn-bull-trigger')?.value || '',
+        invalid: document.getElementById('gp-scn-bull-invalid')?.value || '',
+        status:  (gpData[key]?.scenarios?.bull?.status) || ''
+      },
+      bear: {
+        trigger: document.getElementById('gp-scn-bear-trigger')?.value || '',
+        invalid: document.getElementById('gp-scn-bear-invalid')?.value || '',
+        status:  (gpData[key]?.scenarios?.bear?.status) || ''
+      }
+    },
     savedAt: new Date().toISOString(),
   });
   localStorage.setItem('fd_gpdata', JSON.stringify(gpData));
@@ -12458,6 +12911,10 @@ async function renderGameplan() {
   _set('gp-before-journal', plan.beforeJournal||'');
   _set('gp-actual',         plan.actual||'');
   _set('gp-vs',             plan.vs||'');
+  _set('gp-scn-bull-trigger', plan.scenarios?.bull?.trigger||'');
+  _set('gp-scn-bull-invalid', plan.scenarios?.bull?.invalid||'');
+  _set('gp-scn-bear-trigger', plan.scenarios?.bear?.trigger||'');
+  _set('gp-scn-bear-invalid', plan.scenarios?.bear?.invalid||'');
   const afterJEl = document.getElementById('gp-after-journal'); if(afterJEl) afterJEl.value = plan.afterJournal||'';
   setGPEmos('gp-before-emos', plan.beforeEmo||'');
   setGPEmos('gp-after-emos',  plan.afterEmo||'');
@@ -12497,7 +12954,7 @@ async function renderGameplan() {
 
   // Wire autosave for ALL dates — reads current picker value at input time
   // so editing any day correctly saves to that day, not hardcoded to today
-  ['gp-plan','gp-gc-levels','gp-gc-setups','gp-nq-levels','gp-nq-setups','gp-es-levels','gp-es-setups','gp-events','gp-before-journal','gp-actual','gp-vs'].forEach(id => {
+  ['gp-plan','gp-gc-levels','gp-gc-setups','gp-nq-levels','gp-nq-setups','gp-es-levels','gp-es-setups','gp-events','gp-before-journal','gp-actual','gp-vs','gp-scn-bull-trigger','gp-scn-bull-invalid','gp-scn-bear-trigger','gp-scn-bear-invalid'].forEach(id => {
     const el = document.getElementById(id);
     if(el && !el._homeSynced) {
       el.addEventListener('input', () => {
@@ -12516,6 +12973,11 @@ async function renderGameplan() {
         p.beforeJournal  = document.getElementById('gp-before-journal')?.value || '';
         p.actual         = document.getElementById('gp-actual')?.value || '';
         p.vs             = document.getElementById('gp-vs')?.value || '';
+        p.scenarios      = p.scenarios || { bull:{trigger:'',invalid:'',status:''}, bear:{trigger:'',invalid:'',status:''} };
+        p.scenarios.bull.trigger = document.getElementById('gp-scn-bull-trigger')?.value || '';
+        p.scenarios.bull.invalid = document.getElementById('gp-scn-bull-invalid')?.value || '';
+        p.scenarios.bear.trigger = document.getElementById('gp-scn-bear-trigger')?.value || '';
+        p.scenarios.bear.invalid = document.getElementById('gp-scn-bear-invalid')?.value || '';
         if(currentKey === gpDateKey(new Date())) updateHomePlanPreview();
         // Persist immediately (debounced) — works for every day, not just today
         clearTimeout(el._gpSaveTimer);
@@ -12809,6 +13271,37 @@ async function exportGameplanPDF() {
     '<div style="margin-bottom:10px">'+str.split(',').map(e=>e.trim()).filter(Boolean)
     .map(e=>'<span style="display:inline-block;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:20px;padding:3px 12px;font-size:11px;margin:2px 3px">'+e+'</span>').join('')+'</div>';
 
+  // ── Szenario-Karten (Pre-Market Plan + Post-Session Recap) fuer den PDF-Export ──
+  const scnStatusMeta  = { '':'OFFEN', 'triggered_traded':'GETRIGGERT + GETRADET', 'triggered_missed':'GETRIGGERT, VERPASST', 'invalidated':'INVALIDIERT', 'unclear':'UNKLAR / RANGE' };
+  const scnStatusColor = { '':'#888',  'triggered_traded':'#00e5a0',               'triggered_missed':'#f5a623',              'invalidated':'#ff4d6a',        'unclear':'#888' };
+  const scnPlanBlock = (bias, color, label) => {
+    const scn = (plan.scenarios && plan.scenarios[bias]) || {};
+    if (!scn.trigger && !scn.invalid) return '';
+    return '<div class="section"><div class="sec-title" style="color:'+color+'">'+label+'</div>'
+      + (scn.trigger ? '<div style="font-family:monospace;font-size:9px;color:#555;letter-spacing:2px;margin-bottom:4px">TRIGGER-BEDINGUNG</div><div class="sec-body" style="margin-bottom:8px">'+esc(scn.trigger)+'</div>' : '')
+      + (scn.invalid ? '<div style="font-family:monospace;font-size:9px;color:#555;letter-spacing:2px;margin:8px 0 4px">INVALIDIERUNG</div><div class="sec-body">'+esc(scn.invalid)+'</div>' : '')
+      + '</div>';
+  };
+  const scnRecapBlock = (bias, color, label) => {
+    const scn = (plan.scenarios && plan.scenarios[bias]) || {};
+    const linked = scenTradesFor(key, bias);
+    const manual = scn.status || '';
+    const isAuto = !manual && linked.length > 0;
+    const effective = manual || (isAuto ? 'triggered_traded' : '');
+    if (!scn.trigger && !scn.invalid && !manual && !linked.length) return '';
+    const statusLabel = scnStatusMeta[effective] || 'OFFEN';
+    const statusColor = scnStatusColor[effective] || '#888';
+    const tradesRows = linked.length ? linked.map(t => {
+      const rrNum = parseFloat(String(t.rr||'0').replace('R','').trim()) || 0;
+      const col = rrNum > 0 ? '#27c97a' : (rrNum < 0 ? '#e84040' : '#888');
+      return '<div style="font-family:monospace;font-size:10px;padding:4px 0;border-bottom:1px solid #1a1a1a">'+esc(t.sym||'')+' '+esc(t.dir||'')+' &middot; '+esc(t.date||'')+' <span style="float:right;font-weight:700;color:'+col+'">'+esc(t.rr||'—')+'</span></div>';
+    }).join('') : '<div style="font-family:monospace;font-size:10px;color:#555">Keine Trades verknüpft.</div>';
+    return '<div class="section"><div class="sec-title" style="color:'+color+'">'+label+'</div>'
+      + '<div style="display:inline-block;font-family:monospace;font-size:9px;font-weight:700;letter-spacing:1px;padding:3px 9px;border:1px solid '+statusColor+';border-radius:4px;color:'+statusColor+';margin-bottom:8px">'+statusLabel+(isAuto?' &middot; AUTO-VORSCHLAG':'')+'</div>'
+      + tradesRows
+      + '</div>';
+  };
+
   // Resolve chart screenshots: 1) in-memory (just rendered in UI, most reliable)
   // 2) pre-save snapshot __idb__ pointer  3) post-save plan as last resort
   const chartSs = {};
@@ -12929,7 +13422,8 @@ async function exportGameplanPDF() {
 
   // ── Setup Scanner: Today's Context + Matching Historical Trades ──
   const wipFiltersSaved = plan.wipFilters || {};
-  const wipAllActive = !Object.keys(wipFiltersSaved).length || Object.values(wipFiltersSaved).every(a => !a || !a.length);
+  const wipRefOnlySaved = !!plan.wipRefOnly;
+  const wipAllActive = (!Object.keys(wipFiltersSaved).length || Object.values(wipFiltersSaved).every(a => !a || !a.length)) && !wipRefOnlySaved;
   const wipMatches = wipAllActive ? [] : trades.filter(t => {
     const tags = t.setupTags || [];
     const f = wipFiltersSaved;
@@ -12942,6 +13436,7 @@ async function exportGameplanPDF() {
     if ((f.sweep||[]).length    && !f.sweep.some(v=>tags.includes(v)))     return false;
     if ((f.m15||[]).length      && !f.m15.some(v=>tags.includes(v)))       return false;
     if ((f.cpos||[]).length     && !f.cpos.some(v=>tags.includes(v)))      return false;
+    if (wipRefOnlySaved && !t.refSetup) return false;
     return true;
   });
   const wipTotal    = wipMatches.length;
@@ -13035,6 +13530,8 @@ body{background:#0d0d10;color:#e8e4de;font-family:"Segoe UI",system-ui,sans-seri
     ${sec('OVERALL PLAN & BIAS', esc(plan.plan))}
     ${wipContextBlock}
     ${sec('EVENTS TO WATCH', esc(plan.events))}
+    ${scnPlanBlock('bull', '#00e5a0', '🟢 BULLISH SZENARIO')}
+    ${scnPlanBlock('bear', '#ff4d6a', '🔴 BEARISH SZENARIO')}
     ${(plan.gcLevels||plan.gcSetups) ? `<div class="section"><div class="sec-title" style="color:#c9a84c">GC — GOLD</div>${plan.gcLevels?'<div class="sec-body" style="margin-bottom:6px">'+esc(plan.gcLevels)+'</div>':''}${plan.gcSetups?'<div style="font-family:monospace;font-size:9px;color:#555;letter-spacing:2px;margin:8px 0 4px">SETUPS</div><div class="sec-body">'+esc(plan.gcSetups)+'</div>':''}</div>` : ''}
     ${(plan.nqLevels||plan.nqSetups) ? `<div class="section"><div class="sec-title" style="color:#60a5fa">NQ — NASDAQ</div>${plan.nqLevels?'<div class="sec-body" style="margin-bottom:6px">'+esc(plan.nqLevels)+'</div>':''}${plan.nqSetups?'<div style="font-family:monospace;font-size:9px;color:#555;letter-spacing:2px;margin:8px 0 4px">SETUPS</div><div class="sec-body">'+esc(plan.nqSetups)+'</div>':''}</div>` : ''}
     ${(plan.esLevels||plan.esSetups) ? `<div class="section"><div class="sec-title" style="color:#a78bfa">ES — S&P 500</div>${plan.esLevels?'<div class="sec-body" style="margin-bottom:6px">'+esc(plan.esLevels)+'</div>':''}${plan.esSetups?'<div style="font-family:monospace;font-size:9px;color:#555;letter-spacing:2px;margin:8px 0 4px">SETUPS</div><div class="sec-body">'+esc(plan.esSetups)+'</div>':''}</div>` : ''}
@@ -13050,6 +13547,8 @@ body{background:#0d0d10;color:#e8e4de;font-family:"Segoe UI",system-ui,sans-seri
     <div class="col-label after-label">POST-SESSION — AFTER</div>
     ${sec('WHAT ACTUALLY HAPPENED', esc(plan.actual))}
     ${sec('PLAN VS REALITY', esc(plan.vs))}
+    ${scnRecapBlock('bull', '#00e5a0', '🟢 BULLISH — RECAP')}
+    ${scnRecapBlock('bear', '#ff4d6a', '🔴 BEARISH — RECAP')}
     <div class="section">
       <div class="sec-title">SESSION PERFORMANCE</div>
       ${tradesHtml}
@@ -13993,6 +14492,7 @@ function deletePayout(accountId, payoutId) {
 // fRuleState: { id/text -> 'followed'|'broke'|null }
 let fRuleItems  = [];   // [{id, text, state}]  for log form
 let tmRuleItems = [];   // [{id, text, state}]  for edit modal
+let dlmRuleItems = [];  // [{id, text, state}]  for day-log modal (Tagesplan-Schnellerfassung)
 
 // ── Build chip list from current rules tab ──
 function fRuleBuild(existingItems) {
@@ -14154,6 +14654,56 @@ function tmRuleSyncHidden() {
 
 function tmRuleGetData() {
   return tmRuleItems.filter(r => r.state).map(r => ({ text: r.text, state: r.state, id: r.id }));
+}
+
+// ── DAY-LOG MODAL (dlm) — gleiches 3-Stufen-Muster wie tm, ersetzt den alten reinen
+// sel/unsel-Toggle, der 'broke' nie erreichen konnte (Bug: rulesF war dadurch immer 'yes').
+function dlmRuleBuild(existingItems) {
+  const all = [
+    ...(rules.tr || []),
+    ...(rules.ri || []),
+    ...(rules.en || [])
+  ];
+  if (existingItems && existingItems.length) {
+    const existing = new Map(existingItems.map(r => [r.id || r.text, r]));
+    dlmRuleItems = all.map(r => {
+      const key = r.id || r.text;
+      return existing.has(key)
+        ? { ...existing.get(key), text: r.text }
+        : { id: r.id, text: r.text, state: null };
+    });
+    existingItems.forEach(r => {
+      if (r.custom && !dlmRuleItems.find(x => x.text === r.text)) {
+        dlmRuleItems.push(r);
+      }
+    });
+  } else {
+    dlmRuleItems = all.map(r => ({ id: r.id, text: r.text, state: null }));
+  }
+  dlmRuleRender();
+}
+
+function dlmRuleRender() {
+  const wrap = document.getElementById('dlm-rules-chips');
+  if (!wrap) return;
+  wrap.innerHTML = dlmRuleItems.map((r, i) => {
+    const cls = r.state || '';
+    const icon = r.state === 'followed' ? '✓' : r.state === 'broke' ? '✗' : '○';
+    return `<span class="rc-chip ${cls}" onclick="dlmRuleCycle(${i})" title="${r.state||'unset — click to toggle'}">
+      <span class="rc-icon">${icon}</span>${r.text}
+    </span>`;
+  }).join('');
+}
+
+function dlmRuleCycle(i) {
+  const states = [null, 'followed', 'broke'];
+  const cur = dlmRuleItems[i].state;
+  dlmRuleItems[i].state = states[(states.indexOf(cur) + 1) % states.length];
+  dlmRuleRender();
+}
+
+function dlmRuleGetData() {
+  return dlmRuleItems.filter(r => r.state).map(r => ({ text: r.text, state: r.state, id: r.id }));
 }
 
 // ══════════════════════════════════════════
@@ -15266,6 +15816,65 @@ async function exportWeekReviewPDF() {
     try { localStorage.setItem(LS_TRADE_REVIEWS, JSON.stringify(tradeReviews)); } catch(e) {}
   });
 })();
+
+// ══ CROSS-TAB SYNC ══
+// Guided Session (or any other same-origin tool sharing this browser's file:// storage)
+// can write fd_trades / fd_gpdata directly while this tab stays open. Without this listener,
+// this tab's 10s autosave and beforeunload-save would silently overwrite those external
+// changes with its own stale in-memory copy. The 'storage' event only fires in OTHER tabs,
+// never the one that made the change, so this is safe from feedback loops.
+window.addEventListener('storage', async (e) => {
+  if (!e.key) return;
+  if (e.key === LS_TRADES && e.newValue) {
+    try {
+      const parsed = JSON.parse(e.newValue);
+      trades = await Promise.all(parsed.map(async tr => {
+        if (tr.imgs && !Array.isArray(tr.imgs) && typeof tr.imgs === 'object') {
+          const out = {};
+          for (const k of Object.keys(tr.imgs)) {
+            const flag = tr.imgs[k];
+            out[k] = flag === '__idb__' ? (await idbGet('img_'+tr.id+'_'+k)) || null : flag;
+          }
+          return {...tr, imgs: out, img: undefined};
+        }
+        if (Array.isArray(tr.imgs)) {
+          const imgs = await Promise.all(tr.imgs.map(async (flag, idx) => {
+            if (flag === '__idb__') return await idbGet('img_'+tr.id+'_'+idx);
+            return flag;
+          }));
+          const keys = ['daily','4h','1h','entry'];
+          const out = {};
+          imgs.filter(Boolean).forEach((img,i) => { if (keys[i]) out[keys[i]] = img; });
+          return {...tr, imgs: out, img: undefined};
+        }
+        return {...tr, imgs: tr.imgs || {}};
+      }));
+      try { renderLog(); } catch(err) {}
+      try { renderJCal(); } catch(err) {}
+      try { updateStats(); } catch(err) {}
+      try { if (typeof renderWIP === 'function') renderWIP(); } catch(err) {}
+      try { if (typeof renderTradeList === 'function') renderTradeList(); } catch(err) {}
+      try { if (typeof renderGameplan === 'function') renderGameplan(); } catch(err) {}
+      console.log('↺ fd_trades synced from another tab');
+    } catch(err) { console.warn('Cross-tab trades sync failed:', err); }
+  }
+  if (e.key === 'fd_gpdata' && e.newValue) {
+    try {
+      const parsed = JSON.parse(e.newValue);
+      Object.keys(gpData).forEach(k => delete gpData[k]);
+      Object.assign(gpData, parsed);
+      try { if (typeof renderWIP === 'function') renderWIP(); } catch(err) {}
+      try { if (typeof renderReferencedTrades === 'function') renderReferencedTrades(); } catch(err) {}
+    } catch(err) { console.warn('Cross-tab gpData sync failed:', err); }
+  }
+  if (e.key === 'fd_sessionguide_staged_refs') {
+    try {
+      if (openTradeIdx !== null && openTradeIdx !== undefined && trades[openTradeIdx]) {
+        renderTmReferencedTrades(trades[openTradeIdx]);
+      }
+    } catch(err) {}
+  }
+});
 
 
 // ══ RICH TEXT EDITOR ══

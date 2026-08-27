@@ -796,6 +796,11 @@
   display: flex; flex-direction: column; gap: 10px;
 }
 .an-chart-wide { grid-column: 1 / -1; }
+.an-setup-stats-card {
+  background: linear-gradient(135deg,#111827,#0f172a);
+  border: 1px solid var(--border); border-radius: 12px;
+  padding: 16px 20px; box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
 .an-chart-header { display: flex; align-items: center; justify-content: space-between; }
 .an-chart-sub { font-family: var(--mono); font-size: 9px; color: var(--grey2); letter-spacing: 1px; }
 .an-canvas { width: 100% !important; display: block; border-radius: 6px; }
@@ -1460,6 +1465,13 @@ img.ss-preview{
 [data-theme="light"] .bt-split-row { border-bottom-color: rgba(0,0,0,0.06); }
 [data-theme="light"] .bt-metric { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.08); }
 [data-theme="light"] .bt-session-card { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.08); }
+/* Bugfix: .bt-card (Backtest-Lab-Karten pro Strategie im Analyse-Tab) hatte einen fest verdrahteten
+   dunklen Verlauf (#111827/#0f172a) ohne Light-Override -- blieb dadurch immer dunkel, unabhaengig
+   vom Theme. Analog .an-setup-stats-card (SETUP PERFORMANCE-Box) -- war vorher Inline-Style ohne
+   jede Theme-Anbindung, jetzt eigene Klasse (siehe Basis-Regel weiter oben im Analytics-Block). */
+[data-theme="light"] .bt-card,
+[data-theme="light"] .an-setup-stats-card { background: #fff; border-color: var(--border); box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+[data-theme="light"] .bt-card-head { border-bottom-color: rgba(0,0,0,0.08); }
 [data-theme="light"] .rc-chip { background: rgba(0,0,0,0.04); }
 [data-theme="light"] .rc-chip:hover { background: rgba(0,0,0,0.08); }
 [data-theme="light"] .ss-slot { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.12); }
@@ -3824,8 +3836,22 @@ textarea.f-inp { resize: vertical; min-height: 70px; font-family: var(--sans); f
   background: rgba(245,166,35,0.15); border-color: var(--gold); color: var(--gold);
   box-shadow: 0 0 14px rgba(245,166,35,0.3);
 }
+.runner-btn {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 9px 10px; border-radius: 8px; border: 1px solid var(--border2);
+  background: rgba(255,255,255,0.03); color: var(--grey2);
+  font-family: var(--mono); font-size: 10px; letter-spacing: 2px; font-weight: 700;
+  cursor: pointer; transition: all 0.18s; text-transform: uppercase;
+}
+.runner-btn.r2:hover { border-color: #27c97a; color: #27c97a; }
+.runner-btn.r2.on { background: rgba(39,201,122,0.15); border-color: #27c97a; color: #27c97a; box-shadow: 0 0 14px rgba(39,201,122,0.3); }
+.runner-btn.r3:hover { border-color: #f5a623; color: #f5a623; }
+.runner-btn.r3.on { background: rgba(245,166,35,0.15); border-color: #f5a623; color: #f5a623; box-shadow: 0 0 14px rgba(245,166,35,0.3); }
 .ref-setup-badge {
   cursor: pointer; transition: all 0.15s; user-select: none;
+}
+.runner-badge {
+  cursor: pointer; transition: all 0.15s; user-select: none; font-family: var(--mono);
 }
 
 /* ── STATS FILTER TOGGLE ── */
@@ -4202,6 +4228,7 @@ textarea.f-inp { resize: vertical; min-height: 70px; font-family: var(--sans); f
     <button class="stats-filter-btn"        id="sf-backtest" style="--sf-color:#a78bfa" onclick="setStatsFilter('backtest')">🔬 BACKTEST</button>
     <button class="stats-filter-btn"        id="sf-paper"    style="--sf-color:#38bdf8" onclick="setStatsFilter('paper')">📋 PAPER</button>
     <button class="stats-filter-btn"        id="sf-personal" style="--sf-color:#fb923c" onclick="setStatsFilter('personal')">💼 PERSONAL</button>
+    <button class="stats-filter-btn"        id="sf-refonly" style="--sf-color:#c9a84c" onclick="toggleRefOnlyFilter()" title="Nur als Referenz-Setup markierte Trades (t.refSetup)">🏆 NUR REFERENZ</button>
   </div>
   <div class="stat-cards-row">
 
@@ -4448,6 +4475,14 @@ textarea.f-inp { resize: vertical; min-height: 70px; font-family: var(--sans); f
       <div class="jf-field" style="margin-bottom:14px">
         <div class="jf-lbl" style="color:#a78bfa">STRATEGY</div>
         <select class="bt-strat-select" id="dlm-strategy">
+          <option value="">— none —</option>
+        </select>
+      </div>
+
+      <!-- Kombi-Strategie: optional, fuer Trades wo z.B. Day Trap UND Session Rider gleichzeitig zutreffen -->
+      <div class="jf-field" style="margin-bottom:14px">
+        <div class="jf-lbl" style="color:#a78bfa">KOMBI-STRATEGIE (optional)</div>
+        <select class="bt-strat-select" id="dlm-strategy2">
           <option value="">— none —</option>
         </select>
       </div>
@@ -5397,6 +5432,7 @@ textarea.f-inp { resize: vertical; min-height: 70px; font-family: var(--sans); f
         <button class="stats-filter-btn"        id="an-sf-backtest" style="--sf-color:#a78bfa" onclick="setStatsFilter('backtest')">🔬 BACKTEST</button>
         <button class="stats-filter-btn"        id="an-sf-paper"    style="--sf-color:#38bdf8" onclick="setStatsFilter('paper')">📋 PAPER</button>
         <button class="stats-filter-btn"        id="an-sf-personal" style="--sf-color:#fb923c" onclick="setStatsFilter('personal')">💼 PERSONAL</button>
+        <button class="stats-filter-btn"        id="an-sf-refonly" style="--sf-color:#c9a84c" onclick="toggleRefOnlyFilter()" title="Nur als Referenz-Setup markierte Trades (t.refSetup)">🏆 NUR REFERENZ</button>
       </div>
     </div>
   </div>
@@ -5420,6 +5456,8 @@ textarea.f-inp { resize: vertical; min-height: 70px; font-family: var(--sans); f
     <div class="an-lv-col">
       <div class="an-lv-row"><span class="an-lv-label">Avg Win</span><span class="an-lv-val an-green" id="an-aw">—</span></div>
       <div class="an-lv-row"><span class="an-lv-label">Avg Loss</span><span class="an-lv-val an-red" id="an-al">—</span></div>
+      <div class="an-lv-row"><span class="an-lv-label">Avg Win R</span><span class="an-lv-val an-green" id="an-awr">—</span></div>
+      <div class="an-lv-row"><span class="an-lv-label">Avg Loss R</span><span class="an-lv-val an-red" id="an-alr">—</span></div>
       <div class="an-lv-row"><span class="an-lv-label">Payoff Ratio</span><span class="an-lv-val" id="an-payoff">—</span></div>
       <div class="an-lv-row"><span class="an-lv-label">Days Traded</span><span class="an-lv-val" id="an-days">—</span></div>
     </div>
@@ -5569,8 +5607,16 @@ textarea.f-inp { resize: vertical; min-height: 70px; font-family: var(--sans); f
   <!-- Setup Stats -->
   <div style="margin-top:16px">
     <div class="an-section-lbl" style="--anc:#22d3ee;margin-bottom:12px;padding:0 2px">SETUP PERFORMANCE</div>
-    <div style="background:linear-gradient(135deg,#111827,#0f172a);border:1px solid var(--border);border-radius:12px;padding:16px 20px;box-shadow:0 4px 24px rgba(0,0,0,0.4)">
+    <div class="an-setup-stats-card">
       <div id="an-setup-stats"></div>
+    </div>
+  </div>
+
+  <!-- R-Target Runner Stats (2R/3R erreicht, manuell markiert) -->
+  <div style="margin-top:16px">
+    <div class="an-section-lbl" style="--anc:#27c97a;margin-bottom:12px;padding:0 2px">R-TARGET RUNNER — NACH SETUP</div>
+    <div class="an-setup-stats-card">
+      <div id="an-runner-stats"></div>
     </div>
   </div>
 
@@ -6018,6 +6064,18 @@ textarea.f-inp { resize: vertical; min-height: 70px; font-family: var(--sans); f
           </button>
         </div>
 
+        <!-- R-Target Runner: 2R/3R erreicht (manuell, unabhaengig vom Exit-R) -->
+        <div style="display:flex;gap:8px">
+          <button class="runner-btn r2" id="tm-ran2r-btn" onclick="toggleRan2R(trades[openTradeIdx]?.id, event)"
+            title="Kurs hat nach Entry 2R erreicht — unabhaengig vom tatsaechlichen Exit">
+            <span>2R</span> ERREICHT
+          </button>
+          <button class="runner-btn r3" id="tm-ran3r-btn" onclick="toggleRan3R(trades[openTradeIdx]?.id, event)"
+            title="Kurs hat nach Entry 3R erreicht — unabhaengig vom tatsaechlichen Exit">
+            <span>3R</span> ERREICHT
+          </button>
+        </div>
+
         <!-- Account type -->
         <div>
           <div style="font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--grey2);margin-bottom:6px">ACCOUNT TYPE</div>
@@ -6169,6 +6227,15 @@ textarea.f-inp { resize: vertical; min-height: 70px; font-family: var(--sans); f
           </select>
         </div>
 
+        <!-- Kombi-Strategie: fuer Trades wo z.B. Day Trap UND Session Rider gleichzeitig zutreffen.
+             Primary bleibt die dominante/entryauslösende Strategie oben; hier optional die zweite. -->
+        <div class="tmodal-field">
+          <div class="tmodal-field-lbl" style="color:#a78bfa">KOMBI-STRATEGIE (optional)</div>
+          <select class="bt-strat-select" id="tm-strategy2" style="font-size:12px;padding:6px 10px">
+            <option value="">— none —</option>
+          </select>
+        </div>
+
         <!-- Screenshots -->
         <div>
           <div style="font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--grey2);margin-bottom:6px">SCREENSHOTS</div>
@@ -6268,6 +6335,8 @@ textarea.f-inp { resize: vertical; min-height: 70px; font-family: var(--sans); f
         <th data-sort="date" onclick="tlSetSort('date')">DATUM</th>
         <th>DIR</th><th>SYM</th><th>STRATEGIE</th><th>SESSION</th><th>GRADE</th>
         <th title="Referenz-Setup">🏆</th>
+        <th title="2R erreicht (manuell markiert)">2R</th>
+        <th title="3R erreicht (manuell markiert)">3R</th>
         <th data-sort="rr"  onclick="tlSetSort('rr')">R:R</th>
         <th data-sort="pnl" onclick="tlSetSort('pnl')">P&amp;L</th>
         <th>KONTO</th>
@@ -6466,7 +6535,7 @@ function tab(id, btn) {
 
   if (id==='journal') { renderJCal(); updateStats(); fRuleBuild(fRuleItems.length ? fRuleItems : null); stBuild('f', stGetSelected('f')); }
   if (id==='rules') { calViewDate = new Date(); renderCal(); }
-  if (id==='analytics') { renderAnalytics(); renderSetupStats(); renderBacktestSection(); }
+  if (id==='analytics') { renderAnalytics(); renderSetupStats(); renderRunnerStats(); renderBacktestSection(); }
   if (id==='weekly')    { renderWeekReview(); }
   if (id==='prop') { renderPropTracker(); }
   if (id==='review') { renderReviewView(); }
@@ -6711,6 +6780,7 @@ let strategies = [];
 const LS_STRATEGIES = 'fd_strategies';
 let currentAcctType = 'funded'; // default for new trades
 let statsFilter = 'all'; // 'all' | 'funded' | 'eval'
+let refOnlyFilter = false; // "Nur Referenz-Setups" — zusaetzlicher AND-Filter auf t.refSetup===true, unabhaengig vom Account-Type-Filter (gleiches Muster wie refOnly im Session Guide)
 // 4-slot screenshot store: {daily,4h,1h,entry} → base64 or null
 let ssSlots = {daily:null,'4h':null,'1h':null,entry:null};
 
@@ -6895,6 +6965,26 @@ function setStatsFilter(filter) {
   updateStats();
   renderAnalytics();
   renderSetupStats();
+  renderRunnerStats();
+  renderBacktestSection();
+  renderJCal();
+  renderLog();
+}
+
+// "Nur Referenz-Setups" — unabhaengiger AND-Filter, kombinierbar mit jedem Account-Type-Filter.
+// Wirkt global ueber filteredTrades() (Analytics, Setup Stats, Backtest-Sektion, Journal-Liste, Kalender),
+// nicht nur in der Analytics-Ansicht -- damit "real numbers" ueberall konsistent nur auf wirklich
+// als valide markierten Trades (t.refSetup===true) beruhen, egal welchen Tab man gerade offen hat.
+function toggleRefOnlyFilter() {
+  refOnlyFilter = !refOnlyFilter;
+  ['sf-refonly', 'an-sf-refonly'].forEach(id => {
+    const btn = document.getElementById(id);
+    if(btn) btn.classList.toggle('active', refOnlyFilter);
+  });
+  updateStats();
+  renderAnalytics();
+  renderSetupStats();
+  renderRunnerStats();
   renderBacktestSection();
   renderJCal();
   renderLog();
@@ -6917,7 +7007,7 @@ function tlPopulateFilters(){
   fill('tl-f-candle',uniq(trades.map(t=>tlTagVal(t,'candle'))),'ALLE SESSIONS');
 }
 function tlResetFilters(){
-  ['tl-f-acct','tl-f-strat','tl-f-sym','tl-f-candle','tl-f-dir','tl-f-grade','tl-f-outcome'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['tl-f-acct','tl-f-strat','tl-f-sym','tl-f-candle','tl-f-dir','tl-f-grade','tl-f-outcome','tl-f-ref'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   const s=document.getElementById('tl-search');if(s)s.value='';
   renderTradeList();
 }
@@ -6928,16 +7018,17 @@ function tlSetSort(col){
 }
 function renderTradeList(){
   const gv=id=>document.getElementById(id)?.value||'';
-  const ft={acct:gv('tl-f-acct'),strat:gv('tl-f-strat'),sym:gv('tl-f-sym'),candle:gv('tl-f-candle'),dir:gv('tl-f-dir'),grade:gv('tl-f-grade'),outcome:gv('tl-f-outcome'),q:gv('tl-search').toLowerCase()};
+  const ft={acct:gv('tl-f-acct'),strat:gv('tl-f-strat'),sym:gv('tl-f-sym'),candle:gv('tl-f-candle'),dir:gv('tl-f-dir'),grade:gv('tl-f-grade'),outcome:gv('tl-f-outcome'),ref:gv('tl-f-ref'),q:gv('tl-search').toLowerCase()};
   let list=[...trades];
   if(ft.acct)   list=list.filter(t=>(t.accountType||'funded')===ft.acct);
-  if(ft.strat)  list=list.filter(t=>(t.strategy||'')===ft.strat);
+  if(ft.strat)  list=list.filter(t=>(t.strategy||'')===ft.strat || (t.comboStrategy||'')===ft.strat);
   if(ft.sym)    list=list.filter(t=>(t.sym||'')===ft.sym);
   if(ft.candle) list=list.filter(t=>tlTagVal(t,'candle')===ft.candle);
   if(ft.dir)    list=list.filter(t=>(t.dir||'')===ft.dir);
   if(ft.grade)  list=list.filter(t=>(t.grade||'')===ft.grade);
   if(ft.outcome)list=list.filter(t=>tlOut(t)===ft.outcome);
-  if(ft.q){const tlTerms=ft.q.split(/\s+/).filter(Boolean);list=list.filter(t=>{const hay=tlFreetext(t)+' '+(t.sym||'').toLowerCase()+' '+(t.strategy||'').toLowerCase()+' '+(t.setup||'').toLowerCase()+' '+(t.setupTags||[]).join(' ').toLowerCase();return tlTerms.every(term=>hay.includes(term));});}
+  if(ft.ref==='ref') list=list.filter(t=>!!t.refSetup);
+  if(ft.q){const tlTerms=ft.q.split(/\s+/).filter(Boolean);list=list.filter(t=>{const hay=tlFreetext(t)+' '+(t.sym||'').toLowerCase()+' '+(t.strategy||'').toLowerCase()+' '+(t.comboStrategy||'').toLowerCase()+' '+(t.setup||'').toLowerCase()+' '+(t.setupTags||[]).join(' ').toLowerCase();return tlTerms.every(term=>hay.includes(term));});}
   list.sort((a,b)=>{let av=0,bv=0;if(tlSort.col==='date'){av=a.id||0;bv=b.id||0;}else if(tlSort.col==='pnl'){av=tlPnlNum(a);bv=tlPnlNum(b);}else if(tlSort.col==='rr'){av=tlRrNum(a);bv=tlRrNum(b);}return(av-bv)*tlSort.dir;});
   const ws=list.filter(t=>tlOut(t)==='W').length,ls=list.filter(t=>tlOut(t)==='L').length;
   const tot=list.reduce((s,t)=>s+tlPnlNum(t),0),wr=list.length?Math.round(ws/list.length*100):0;
@@ -6955,10 +7046,12 @@ function renderTradeList(){
       '<td class="tl-date">'+(t.date||'\u2014')+'</td>'+
       '<td><span class="'+dc+'" style="font-size:11px;padding:1px 5px">'+(t.dir||'\u2014')+'</span></td>'+
       '<td class="tl-sym">'+(t.sym||'\u2014')+'</td>'+
-      '<td class="tl-strat">'+(t.strategy||'\u2014')+'</td>'+
+      '<td class="tl-strat">'+(t.strategy||'\u2014')+(t.comboStrategy?' <span style="opacity:0.6">+ '+t.comboStrategy+'</span>':'')+'</td>'+
       '<td class="tl-candle">'+(tlTagVal(t,'candle')||'\u2014')+'</td>'+
       '<td><span class="tl-grade '+tlGradeCls(t.grade||'')+'">'+(t.grade||'\u2014')+'</span></td>'+
       '<td class="ref-setup-badge" onclick="event.stopPropagation();toggleRefSetup('+t.id+')" title="Als Referenz-Setup markieren" style="text-align:center;'+(t.refSetup?'':'opacity:0.3')+'">'+(t.refSetup?'🏆':'☆')+'</td>'+
+      '<td class="runner-badge" onclick="event.stopPropagation();toggleRan2R('+t.id+')" title="2R erreicht (manuell markieren)" style="text-align:center;cursor:pointer;'+(t.ran2R?'color:#27c97a;font-weight:700':'opacity:0.3')+'">'+(t.ran2R?'2R✓':'—')+'</td>'+
+      '<td class="runner-badge" onclick="event.stopPropagation();toggleRan3R('+t.id+')" title="3R erreicht (manuell markieren)" style="text-align:center;cursor:pointer;'+(t.ran3R?'color:#f5a623;font-weight:700':'opacity:0.3')+'">'+(t.ran3R?'3R✓':'—')+'</td>'+
       '<td class="'+rc+'">'+rr+'</td>'+
       '<td class="'+pc2+'">'+(pnl>=0?'+':'')+'$'+Math.round(Math.abs(pnl)).toLocaleString()+'</td>'+
       '<td class="tl-acct">'+(t.accountType||'funded')+'</td></tr>';
@@ -6967,11 +7060,13 @@ function renderTradeList(){
 // ══ END TRADE LIST JS ══
 
 function filteredTrades() {
-  if(statsFilter === 'all')      return trades;
-  if(statsFilter === 'backtest') return trades.filter(t => t.accountType === 'backtest');
-  if(statsFilter === 'paper')    return trades.filter(t => t.accountType === 'paper');
-  if(statsFilter === 'personal') return trades.filter(t => t.accountType === 'personal');
-  return trades.filter(t => (t.accountType || 'funded') === statsFilter);
+  let base;
+  if(statsFilter === 'all')      base = trades;
+  else if(statsFilter === 'backtest') base = trades.filter(t => t.accountType === 'backtest');
+  else if(statsFilter === 'paper')    base = trades.filter(t => t.accountType === 'paper');
+  else if(statsFilter === 'personal') base = trades.filter(t => t.accountType === 'personal');
+  else base = trades.filter(t => (t.accountType || 'funded') === statsFilter);
+  return refOnlyFilter ? base.filter(t => t.refSetup) : base;
 }
 
 async function logTrade() {
@@ -7258,6 +7353,7 @@ async function openTModal(i) {
   setRichContent('tm-notes-editor', t.notes||'');
   // Strategy
   btPopulateSelect('tm-strategy', t.strategy || '');
+  btPopulateSelect('tm-strategy2', t.comboStrategy || '');
   // Account type
   setTMAcctType(t.accountType || 'funded');
   // AI section hidden on open
@@ -7268,6 +7364,10 @@ async function openTModal(i) {
   renderTmReferencedTrades(t);
   const rsBtn = document.getElementById('tm-refsetup-btn');
   if (rsBtn) rsBtn.classList.toggle('on', !!t.refSetup);
+  const r2Btn = document.getElementById('tm-ran2r-btn');
+  if (r2Btn) r2Btn.classList.toggle('on', !!t.ran2R);
+  const r3Btn = document.getElementById('tm-ran3r-btn');
+  if (r3Btn) r3Btn.classList.toggle('on', !!t.ran3R);
   document.getElementById('tmodal-overlay').classList.add('open');
 }
 
@@ -7327,12 +7427,14 @@ async function saveTMEdits() {
   }
 
   const tmStrategy = document.getElementById('tm-strategy')?.value || '';
+  const tmStrategy2 = document.getElementById('tm-strategy2')?.value || '';
   const tmSetupTags = ['tm-tag-trigger-tf','tm-tag-trade-candle','tm-tag-sweep-level','tm-tag-15m-conf','tm-tag-3m-conf','tm-tag-protected-swing','tm-tag-candle-pos'].map(id=>document.getElementById(id)?.value||'').filter(v=>v);
   const tmSession = document.getElementById('tm-session')?.value || trades[i].session || 'New York 08:00';
   Object.assign(trades[i], {
     id: newId,
     date: newDate,
     strategy: tmStrategy,
+    comboStrategy: tmStrategy2,
     setup: tmStrategy || trades[i].setup || '',
     setupTags: tmSetupTags,
     session: tmSession,
@@ -7369,6 +7471,45 @@ function toggleRefSetup(id, ev) {
     const b = document.getElementById('tm-refsetup-btn');
     if (b) b.classList.toggle('on', !!trades[idx].refSetup);
   }
+}
+// ── R-TARGET RUNNER (2R/3R erreicht) ──
+// Manuelle Markierung: Kurs hat nach Entry 2R bzw. 3R erreicht, unabhaengig vom
+// tatsaechlichen Exit-R (t.rr). Dient der Auswertung "R liegen gelassen" in
+// Weekly Review + Analytics. Kopplung: 3R impliziert technisch immer 2R,
+// darum wird die Konsistenz hier zwangsweise hergestellt (siehe Nutzer-Entscheidung).
+function _fdSyncRunnerUI(idx) {
+  if (openTradeIdx === idx) {
+    const b2 = document.getElementById('tm-ran2r-btn');
+    if (b2) b2.classList.toggle('on', !!trades[idx].ran2R);
+    const b3 = document.getElementById('tm-ran3r-btn');
+    if (b3) b3.classList.toggle('on', !!trades[idx].ran3R);
+  }
+}
+function toggleRan2R(id, ev) {
+  if (ev) ev.stopPropagation();
+  if (id === undefined || id === null) return;
+  const idx = trades.findIndex(x => x.id === id);
+  if (idx === -1) return;
+  trades[idx].ran2R = !trades[idx].ran2R;
+  if (!trades[idx].ran2R && trades[idx].ran3R) trades[idx].ran3R = false; // 2R aus -> 3R zwingend auch aus
+  save();
+  if (typeof renderTradeList === 'function') renderTradeList();
+  if (typeof renderPerfDay === 'function') renderPerfDay();
+  if (typeof renderWIP === 'function') renderWIP();
+  _fdSyncRunnerUI(idx);
+}
+function toggleRan3R(id, ev) {
+  if (ev) ev.stopPropagation();
+  if (id === undefined || id === null) return;
+  const idx = trades.findIndex(x => x.id === id);
+  if (idx === -1) return;
+  trades[idx].ran3R = !trades[idx].ran3R;
+  if (trades[idx].ran3R) trades[idx].ran2R = true; // 3R an -> 2R zwingend auch an
+  save();
+  if (typeof renderTradeList === 'function') renderTradeList();
+  if (typeof renderPerfDay === 'function') renderPerfDay();
+  if (typeof renderWIP === 'function') renderWIP();
+  _fdSyncRunnerUI(idx);
 }
 
 function openTMById(id) {
@@ -7811,6 +7952,7 @@ function tmSetScenario(v){
 function dlmResetForm() {
   const sym = document.getElementById('dlm-sym'); if(sym) sym.value = 'ES';
   const stratSel = document.getElementById('dlm-strategy'); if(stratSel) stratSel.value = '';
+  const stratSel2 = document.getElementById('dlm-strategy2'); if(stratSel2) stratSel2.value = '';
   const dir = document.getElementById('dlm-dir'); if(dir) dir.value = 'LONG';
   const sz  = document.getElementById('dlm-size'); if(sz) sz.value = '1';
   ['dlm-rr','dlm-pnl','dlm-ntd-notes'].forEach(id => {
@@ -7864,6 +8006,7 @@ async function dlmLogTrade() {
     pnl: isNaN(pnlV) ? 0 : Math.round(pnlV*100)/100,
     setup: dlmSetupType, setupTags: ['tag-trigger-tf','tag-trade-candle','tag-sweep-level','tag-15m-conf','tag-3m-conf','tag-protected-swing','tag-candle-pos'].map(id=>document.getElementById(id)?.value||'').filter(v=>v), rulesF, ruleData, notes, session,
     strategy: document.getElementById('dlm-strategy')?.value || '',
+    comboStrategy: document.getElementById('dlm-strategy2')?.value || '',
     swingTime: dlmSwingTime,
     emoJournal: '', emo, conf: dlmConf,
     rr: !isNaN(rrV) ? `${rrV.toFixed(2)}R` : '—',
@@ -11369,6 +11512,8 @@ function renderPerfDay() {
         </div>
         <div class="ptr-right">
           <span class="ref-setup-badge" onclick="event.stopPropagation();toggleRefSetup(${t.id})" title="Als Referenz-Setup markieren" style="${t.refSetup?'':'opacity:0.35'};margin-right:2px">${t.refSetup?'🏆':'☆'}</span>
+          <span class="runner-badge" onclick="event.stopPropagation();toggleRan2R(${t.id})" title="2R erreicht (manuell markieren)" style="cursor:pointer;font-family:var(--mono);font-size:10px;font-weight:700;margin-right:2px;${t.ran2R?'color:#27c97a':'opacity:0.3'}">2R</span>
+          <span class="runner-badge" onclick="event.stopPropagation();toggleRan3R(${t.id})" title="3R erreicht (manuell markieren)" style="cursor:pointer;font-family:var(--mono);font-size:10px;font-weight:700;margin-right:4px;${t.ran3R?'color:#f5a623':'opacity:0.3'}">3R</span>
           <span class="ptr-pnl ${pnlClass}">${pnlStr}</span>
           <span class="ptr-rr">${t.rr || '—'}</span>
         </div>
@@ -13610,7 +13755,7 @@ function renderAnalytics() {
   const filterLabel = statsFilter === 'eval' ? ' · 🧪 Eval' : statsFilter === 'funded' ? ' · ✅ Funded' : statsFilter === 'backtest' ? ' · 🔬 Backtest' : statsFilter === 'personal' ? ' · 💼 Personal' : '';
 
   if(!ft.length) {
-    ['an-pnl','an-wr','an-pf','an-exp','an-rr','an-aw','an-al','an-bestday','an-worstday',
+    ['an-pnl','an-wr','an-pf','an-exp','an-rr','an-aw','an-al','an-awr','an-alr','an-bestday','an-worstday',
      'an-payoff','an-days','an-best','an-worst','an-worst2','an-score','an-score-lbl',
      'an-tstreak','an-dstreak','an-maxw','an-maxl','an-sharpe','an-sortino','an-maxdd','an-maxcl',
      'ansb-pf-v','ansb-rr-v','ansb-wr-v','ansb-rf-v','ansb-cons-v'].forEach(id => set(id, '—'));
@@ -13637,6 +13782,15 @@ function renderAnalytics() {
 
   const rrNums = ft.map(t=>parseFloat(t.rr)).filter(v=>!isNaN(v)&&isFinite(v));
   const avgRR  = rrNums.length ? rrNums.reduce((a,b)=>a+b,0)/rrNums.length : 0;
+
+  // Avg Win R / Avg Loss R — getrennte R-Multiple-Durchschnitte (bisher gab es nur avgRR
+  // kombiniert ueber Win+Loss+BE, und avgWin/avgLoss nur in $). Nutzt dieselbe _cls-Klassifikation
+  // wie Winrate/PF oben; Trades mit nicht parsbarem rr (z.B. "—") werden hier ausgeschlossen statt
+  // als 0 mitgezaehlt, damit ein einzelner Trade ohne R-Wert den Schnitt nicht verzerrt.
+  const winRRNums  = wins.map(t=>parseFloat(t.rr)).filter(v=>!isNaN(v)&&isFinite(v));
+  const lossRRNums = losses.map(t=>parseFloat(t.rr)).filter(v=>!isNaN(v)&&isFinite(v));
+  const avgWinR  = winRRNums.length  ? winRRNums.reduce((a,b)=>a+b,0)/winRRNums.length   : null;
+  const avgLossR = lossRRNums.length ? lossRRNums.reduce((a,b)=>a+b,0)/lossRRNums.length : null;
 
   // Expectancy = (WR * avgWin) + ((1-WR) * avgLoss)
   const expectancy = (wr/100 * avgWin) + ((1 - wr/100) * avgLoss);
@@ -13759,6 +13913,8 @@ function renderAnalytics() {
   set('an-rr',  avgRR ? (avgRR>=0?'+':'')+avgRR.toFixed(2)+'R' : '—', avgRR>=0?'#1de9c0':'#e84040');
   set('an-aw',  avgWin  ? '+$'+Math.round(avgWin).toLocaleString()  : '—', '#27c97a');
   set('an-al',  avgLoss ? '-$'+Math.round(Math.abs(avgLoss)).toLocaleString() : '—', '#e84040');
+  set('an-awr', avgWinR  !== null ? '+'+avgWinR.toFixed(2)+'R' : '—', '#27c97a');
+  set('an-alr', avgLossR !== null ? avgLossR.toFixed(2)+'R'    : '—', '#e84040');
   set('an-bestday',  bestDay  !== null ? '+$'+Math.round(bestDay).toLocaleString()  : '—', '#27c97a');
   set('an-worstday', worstDay !== null ? '-$'+Math.round(Math.abs(worstDay)).toLocaleString() : '—', '#e84040');
   set('an-payoff', payoff ? payoff.toFixed(2) : '—', payoff>=1?'#27c97a':payoff>0?'#e84040':'var(--grey1)');
@@ -14829,7 +14985,9 @@ function btPopulateSelect(selectId, currentVal) {
 
 function btPopulateAllSelects() {
   btPopulateSelect('dlm-strategy', document.getElementById('dlm-strategy')?.value || '');
+  btPopulateSelect('dlm-strategy2', document.getElementById('dlm-strategy2')?.value || '');
   btPopulateSelect('tm-strategy',  document.getElementById('tm-strategy')?.value  || '');
+  btPopulateSelect('tm-strategy2', document.getElementById('tm-strategy2')?.value || '');
 }
 
 function btRenderChips() {
@@ -15043,6 +15201,59 @@ function renderSetupStats() {
         <div class="sst-bar-wrap"><div class="sst-bar" style="width:${barW}%;background:${barColor};box-shadow:0 0 6px ${barColor}55"></div></div>
       </div>`;
     }).join('')}
+  `;
+}
+
+// ── R-TARGET RUNNER STATS for Analytics (2R/3R erreicht, nach Setup) ──
+// ran2R/ran3R sind manuelle Marker (Kurs erreichte das Ziel nach Entry), unabhaengig
+// vom tatsaechlichen Exit-R (t.rr). "Gap" = Ø liegen gelassenes R fuer Trades, die das
+// Ziel erreichten aber darunter ausstiegen. Respektiert den aktuellen Account-Filter
+// (filteredTrades()), analog zu renderSetupStats().
+function renderRunnerStats() {
+  const wrap = document.getElementById('an-runner-stats');
+  if(!wrap) return;
+
+  const ft = filteredTrades();
+  if(!ft.length) {
+    wrap.innerHTML = '<div style="padding:20px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--grey2);letter-spacing:2px">NOCH KEINE TRADES</div>';
+    return;
+  }
+
+  const gapOf = (t, target) => target - (parseFloat(t.rr)||0);
+
+  // Global row (alle gefilterten Trades, ungeachtet Setup)
+  const mkRow = (label, ts) => {
+    const n = ts.length;
+    const r2 = ts.filter(t=>t.ran2R);
+    const r3 = ts.filter(t=>t.ran3R);
+    const pct2 = n ? Math.round(r2.length/n*100) : 0;
+    const pct3 = n ? Math.round(r3.length/n*100) : 0;
+    const gaps2 = r2.map(t=>gapOf(t,2)).filter(v=>v>0.001);
+    const gaps3 = r3.map(t=>gapOf(t,3)).filter(v=>v>0.001);
+    const avgGap2 = gaps2.length ? gaps2.reduce((a,b)=>a+b,0)/gaps2.length : null;
+    const avgGap3 = gaps3.length ? gaps3.reduce((a,b)=>a+b,0)/gaps3.length : null;
+    return `<div class="sst-row">
+      <span class="sst-name" title="${label}">${label}</span>
+      <span style="color:var(--white)">${n}</span>
+      <span style="color:#27c97a">${pct2}% <span style="color:var(--grey2);font-size:10px">(${r2.length}×${avgGap2!==null?', -'+avgGap2.toFixed(2)+'R':''})</span></span>
+      <span style="color:#f5a623">${pct3}% <span style="color:var(--grey2);font-size:10px">(${r3.length}×${avgGap3!==null?', -'+avgGap3.toFixed(2)+'R':''})</span></span>
+    </div>`;
+  };
+
+  const setupMap = {};
+  ft.forEach(t => {
+    const s = t.strategy || t.setup || 'other';
+    if(!setupMap[s]) setupMap[s] = [];
+    setupMap[s].push(t);
+  });
+  const rows = Object.entries(setupMap).sort((a,b) => b[1].length - a[1].length);
+
+  wrap.innerHTML = `
+    <div class="sst-row sst-head">
+      <span>SETUP</span><span>TRADES</span><span>2R ERREICHT</span><span>3R ERREICHT</span>
+    </div>
+    ${mkRow('ALLE (gesamt)', ft)}
+    ${rows.map(([name, ts]) => mkRow(name, ts)).join('')}
   `;
 }
 
@@ -15261,9 +15472,11 @@ function wrCalcStats(wt) {
   const sessMap = {};
   for (const t of wt) {
     const s = (t.session||'other').toLowerCase().replace(/[^a-z]/g,'');
-    if (!sessMap[s]) sessMap[s] = { label: SESSION_LABELS[s] || s.toUpperCase(), r:0, wins:0, losses:0, count:0 };
+    if (!sessMap[s]) sessMap[s] = { label: SESSION_LABELS[s] || s.toUpperCase(), r:0, wins:0, losses:0, count:0, ran2R:0, ran3R:0 };
     sessMap[s].count++;
     sessMap[s].r += parseFloat(t.rr)||0;
+    if (t.ran2R) sessMap[s].ran2R++;
+    if (t.ran3R) sessMap[s].ran3R++;
     const cls = wrClassify(t);
     if (cls === 'win')  sessMap[s].wins++;
     if (cls === 'loss') sessMap[s].losses++;
@@ -15273,8 +15486,11 @@ function wrCalcStats(wt) {
   const setupMap = {};
   for (const t of wt) {
     const s = t.strategy || t.setup || 'other';
-    if (!setupMap[s]) setupMap[s] = { wins:0, losses:0, r:0 };
+    if (!setupMap[s]) setupMap[s] = { wins:0, losses:0, r:0, ran2R:0, ran3R:0, count:0 };
+    setupMap[s].count++;
     setupMap[s].r += parseFloat(t.rr)||0;
+    if (t.ran2R) setupMap[s].ran2R++;
+    if (t.ran3R) setupMap[s].ran3R++;
     const cls = wrClassify(t);
     if (cls === 'win')  setupMap[s].wins++;
     if (cls === 'loss') setupMap[s].losses++;
@@ -15292,7 +15508,25 @@ function wrCalcStats(wt) {
       tagMap[prefix][value][wrClassify(t)]++;
     }
   }
-  return { wins, losses, rrNums, totalR, avgR, winRate, totalPnl, sessMap, sessionEntries, bestSession, setupMap, tagMap, PREFIX_ORDER, PREFIX_LABELS };
+  // ── R-Target Runner Stats: 2R/3R erreicht + "R liegen gelassen" ──
+  // ran2R/ran3R sind manuelle Marker (Kurs hat das Ziel erreicht), unabhaengig vom
+  // tatsaechlichen Exit (t.rr). Gap = Differenz zwischen Ziel-R und Exit-R, nur
+  // gezaehlt wenn tatsaechlich unter dem Ziel ausgestiegen wurde (Gap > 0).
+  const r2Trades  = wt.filter(t => t.ran2R);
+  const r3Trades  = wt.filter(t => t.ran3R);
+  const pct2R     = wt.length ? r2Trades.length / wt.length : null;
+  const pct3R     = wt.length ? r3Trades.length / wt.length : null;
+  const r2Gaps    = r2Trades.map(t => 2 - (parseFloat(t.rr)||0)).filter(v => v > 0.001);
+  const r3Gaps    = r3Trades.map(t => 3 - (parseFloat(t.rr)||0)).filter(v => v > 0.001);
+  const avgGap2R  = r2Gaps.length ? r2Gaps.reduce((s,v)=>s+v,0) / r2Gaps.length : null;
+  const avgGap3R  = r3Gaps.length ? r3Gaps.reduce((s,v)=>s+v,0) / r3Gaps.length : null;
+  const runnerStats = {
+    r2Count: r2Trades.length, r3Count: r3Trades.length,
+    pct2R, pct3R,
+    avgGap2R, avgGap3R,
+    gap2RCount: r2Gaps.length, gap3RCount: r3Gaps.length
+  };
+  return { wins, losses, rrNums, totalR, avgR, winRate, totalPnl, sessMap, sessionEntries, bestSession, setupMap, tagMap, PREFIX_ORDER, PREFIX_LABELS, runnerStats };
 }
 
 function wrCheckCompliance(wt) {
@@ -15424,6 +15658,24 @@ function renderWeekReview() {
     + '<div class="card"><div class="card-head"><div class="card-title">SETUP BREAKDOWN</div></div><div style="padding:14px 20px">' + (setupRows || '<div class="wr-empty" style="padding:20px 0">—</div>') + '</div></div>'
     + '<div class="card"><div class="card-head"><div class="card-title">SESSION BREAKDOWN</div></div><div style="padding:14px 20px">' + sessRows + '</div></div>'
     + '</div>';
+
+  // B2) R-Target Runner — 2R/3R erreicht + "R liegen gelassen"
+  // ran2R/ran3R sind manuelle Marker (Kurs erreichte das Ziel), unabhaengig vom Exit-R.
+  {
+    const rs = s.runnerStats;
+    const pct2Str = rs.pct2R !== null ? Math.round(rs.pct2R*100)+'%' : '—';
+    const pct3Str = rs.pct3R !== null ? Math.round(rs.pct3R*100)+'%' : '—';
+    const gap2Str = rs.avgGap2R !== null ? '-' + rs.avgGap2R.toFixed(2) + 'R' : '—';
+    const gap3Str = rs.avgGap3R !== null ? '-' + rs.avgGap3R.toFixed(2) + 'R' : '—';
+    html += '<div class="card" style="margin-bottom:16px">'
+      + '<div class="card-head"><div class="card-title">R-TARGET RUNNER</div></div>'
+      + '<div style="padding:14px 20px;display:grid;grid-template-columns:repeat(4,1fr);gap:14px">'
+      + '<div><div class="wr-stat-val" style="color:#27c97a">' + pct2Str + '</div><div class="wr-stat-lbl">2R ERREICHT (' + rs.r2Count + '×)</div></div>'
+      + '<div><div class="wr-stat-val" style="color:#f5a623">' + pct3Str + '</div><div class="wr-stat-lbl">3R ERREICHT (' + rs.r3Count + '×)</div></div>'
+      + '<div><div class="wr-stat-val neg">' + gap2Str + '</div><div class="wr-stat-lbl">Ø LIEGEN GELASSEN AB 2R (' + rs.gap2RCount + '×)</div></div>'
+      + '<div><div class="wr-stat-val neg">' + gap3Str + '</div><div class="wr-stat-lbl">Ø LIEGEN GELASSEN AB 3R (' + rs.gap3RCount + '×)</div></div>'
+      + '</div></div>';
+  }
 
   // C) Tag Analyse
   const tagCards = s.PREFIX_ORDER.filter(p => s.tagMap[p]).map(prefix => {
